@@ -6,21 +6,17 @@ namespace StarcraftOrganizer.Data.Entities
     {
         public int Id { get; set; }
 
-
         public int Player1Id { get; set; }
-        public Player Player1 { get; set; }
+        public Player? Player1 { get; set; }
 
         public int Player2Id { get; set; }
-        public Player Player2 { get; set; }
+        public Player? Player2 { get; set; } 
 
         public BestOfFormat SeriesFormat { get; set; } 
 
-
         public ChallengeStatus Status { get; set; } 
 
-
         public DateTime CreationDate { get; set; } = DateTime.UtcNow;
-
 
         public int? Player1VetoMapId { get; set; }
         [ForeignKey("Player1VetoMapId")] 
@@ -31,7 +27,6 @@ namespace StarcraftOrganizer.Data.Entities
         public Map? Player2VetoMap { get; set; }
 
         public virtual ICollection<Match> Matches { get; set; } = new List<Match>();
-
 
          public virtual ICollection<Map> MapPoolSnapshot { get; set; } = new List<Map>();
     }

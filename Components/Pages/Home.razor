@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using StarcraftOrganizer.Data.Entities
 @* Injicera dina datatjänster för att hämta spelare och kartor *@
 @* @inject IPlayerService PlayerService *@
 @* @inject IMapService MapService *@
@@ -8,10 +9,10 @@
 
 <h1>Skapa Ny Starcraft Utmaning</h1>
 
-@* Använd EditForm för validering och hantering av formulärdata *@
+
 <EditForm Model="newChallengeInput" OnValidSubmit="HandleCreateChallenge">
-    <DataAnnotationsValidator /> @* För validering baserat på attribut i modellen *@
-    <ValidationSummary />      @* Visar en sammanfattning av valideringsfel *@
+    <DataAnnotationsValidator /> 
+    <ValidationSummary />      
 
     <div class="space-y-6 p-4 max-w-lg mx-auto bg-gray-800/50 rounded-lg shadow">
 
@@ -21,7 +22,7 @@
             <div class="flex gap-4">
                 <div class="flex-1">
                     <label for="player1" class="block text-sm font-medium text-gray-300">Spelare 1</label>
-                    <InputSelect id="player1" @bind-Value="newChallengeInput.Player1Id" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <InputSelect id="player1" @bind-Value="newChallengeInput.Player1Id" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Välj spelare...</option>
                         @if (allPlayers != null)
                         {
@@ -35,7 +36,7 @@
                 </div>
                 <div class="flex-1">
                     <label for="player2" class="block text-sm font-medium text-gray-300">Spelare 2</label>
-                    <InputSelect id="player2" @bind-Value="newChallengeInput.Player2Id" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <InputSelect id="player2" @bind-Value="newChallengeInput.Player2Id" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Välj spelare...</option>
                         @if (allPlayers != null)
                         {
@@ -49,7 +50,6 @@
                     <ValidationMessage For="@(() => newChallengeInput.Player2Id)" />
                 </div>
             </div>
-            @* Manuell validering för att säkerställa att spelare inte är samma *@
             @if (newChallengeInput.Player1Id != 0 && newChallengeInput.Player1Id == newChallengeInput.Player2Id)
             {
                 <p class="text-red-500 text-sm">Spelare 1 och Spelare 2 får inte vara samma person.</p>
@@ -61,7 +61,7 @@
             <legend class="text-lg font-semibold mb-2 text-white">Serieformat</legend>
             <div>
                 <label for="format" class="block text-sm font-medium text-gray-300">Bäst av:</label>
-                <InputSelect id="format" @bind-Value="newChallengeInput.SeriesFormat" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <InputSelect id="format" @bind-Value="newChallengeInput.SeriesFormat" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                     @foreach (var format in Enum.GetValues<BestOfFormat>())
                     {
                         <option value="@format">@((int)format)</option>
@@ -78,7 +78,7 @@
             <div class="flex gap-4">
                 <div class="flex-1">
                     <label for="veto1" class="block text-sm font-medium text-gray-300">@(player1Name)'s Veto</label>
-                    <InputSelect id="veto1" @bind-Value="newChallengeInput.Player1VetoMapId" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <InputSelect id="veto1" @bind-Value="newChallengeInput.Player1VetoMapId" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Ingen veto...</option>
                         @if (availableMaps != null)
                         {
@@ -92,7 +92,7 @@
                 </div>
                 <div class="flex-1">
                     <label for="veto2" class="block text-sm font-medium text-gray-300">@(player2Name)'s Veto</label>
-                    <InputSelect id="veto2" @bind-Value="newChallengeInput.Player2VetoMapId" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                    <InputSelect id="veto2" @bind-Value="newChallengeInput.Player2VetoMapId" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         <option value="">Ingen veto...</option>
                         @if (availableMaps != null)
                         {
@@ -184,16 +184,16 @@
         if (!IsFormValid()) return; // Dubbelkolla validitet
 
         // Skapa Challenge-objektet från input-modellen
-        var challenge = new Challenge
-            {
-                Player1Id = newChallengeInput.Player1Id,
-                Player2Id = newChallengeInput.Player2Id,
-                SeriesFormat = newChallengeInput.SeriesFormat,
-                Player1VetoMapId = newChallengeInput.Player1VetoMapId,
-                Player2VetoMapId = newChallengeInput.Player2VetoMapId,
-                Status = ChallengeStatus.ReadyToPlay, // Eller PendingVeto om du vill ha det steget
-                CreationDate = DateTime.UtcNow
-            };
+        // var challenge = new Challenge
+        //     {
+        //         Player1 = newChallengeInput.Player1Id,
+        //         Player2Id = newChallengeInput.Player2Id,
+        //         SeriesFormat = newChallengeInput.SeriesFormat,
+        //         Player1VetoMapId = newChallengeInput.Player1VetoMapId,
+        //         Player2VetoMapId = newChallengeInput.Player2VetoMapId,
+        //         Status = ChallengeStatus.ReadyToPlay, Eller PendingVeto om du vill ha det steget
+        //         CreationDate = DateTime.UtcNow
+        //     };
 
         try
         {
