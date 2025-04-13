@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StarcraftOrganizer.Components;
 using StarcraftOrganizer.Data.DataContext;
+using StarcraftOrganizer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,17 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("SQL")));
 
+
+
+#region ScopedServices
+
+builder.Services.AddScoped<PlayerService, PlayerService>();
+builder.Services.AddScoped<MatchService, MatchService>();
+builder.Services.AddScoped<MapService, MapService>();
+builder.Services.AddScoped<ChallengeService, ChallengeService>();
+
+
+#endregion
 
 var app = builder.Build();
 

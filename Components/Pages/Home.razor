@@ -1,133 +1,137 @@
 ﻿@page "/"
 @using StarcraftOrganizer.Data.Entities
-@* Injicera dina datatjänster för att hämta spelare och kartor *@
-@* @inject IPlayerService PlayerService *@
-@* @inject IMapService MapService *@
-@* @inject IChallengeService ChallengeService *@
+@inject PlayerService PlayerService
+@inject MapService MapService 
+@inject ChallengeService ChallengeService 
 
-<PageTitle>Skapa Utmaning</PageTitle>
+<Page>
+    <ChildContent>
+        <h1 class="text-3xl font-bold text-center p-4 mb-4">Test Your Might</h1>
 
-<h1>Skapa Ny Starcraft Utmaning</h1>
 
+        <EditForm Model="newChallengeInput" OnValidSubmit="HandleCreateChallenge">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-<EditForm Model="newChallengeInput" OnValidSubmit="HandleCreateChallenge">
-    <DataAnnotationsValidator /> 
-    <ValidationSummary />      
+            <div class="space-y-6 p-4 max-w-lg mx-auto bg-gray-800/50 rounded-lg shadow">
 
-    <div class="space-y-6 p-4 max-w-lg mx-auto bg-gray-800/50 rounded-lg shadow">
-
-        @* == Steg 1: Välj Spelare == *@
-        <fieldset class="space-y-2">
-            <legend class="text-lg font-semibold mb-2 text-white">Välj Spelare</legend>
-            <div class="flex gap-4">
-                <div class="flex-1">
-                    <label for="player1" class="block text-sm font-medium text-gray-300">Spelare 1</label>
-                    <InputSelect id="player1" @bind-Value="newChallengeInput.Player1Id" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Välj spelare...</option>
-                        @if (allPlayers != null)
-                        {
-                            @foreach (var player in allPlayers)
-                            {
-                                <option value="@player.Id">@player.Name (@player.Race)</option>
-                            }
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => newChallengeInput.Player1Id)" />
-                </div>
-                <div class="flex-1">
-                    <label for="player2" class="block text-sm font-medium text-gray-300">Spelare 2</label>
-                    <InputSelect id="player2" @bind-Value="newChallengeInput.Player2Id" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Välj spelare...</option>
-                        @if (allPlayers != null)
-                        {
-                            @* Filtrera bort den som valts som Spelare 1 *@
-                            @foreach (var player in allPlayers.Where(p => p.Id != newChallengeInput.Player1Id))
-                            {
-                                <option value="@player.Id">@player.Name (@player.Race)</option>
-                            }
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => newChallengeInput.Player2Id)" />
-                </div>
-            </div>
-            @if (newChallengeInput.Player1Id != 0 && newChallengeInput.Player1Id == newChallengeInput.Player2Id)
-            {
-                <p class="text-red-500 text-sm">Spelare 1 och Spelare 2 får inte vara samma person.</p>
-            }
-        </fieldset>
-
-        @* == Steg 2: Välj Format == *@
-        <fieldset class="space-y-2">
-            <legend class="text-lg font-semibold mb-2 text-white">Serieformat</legend>
-            <div>
-                <label for="format" class="block text-sm font-medium text-gray-300">Bäst av:</label>
-                <InputSelect id="format" @bind-Value="newChallengeInput.SeriesFormat" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                    @foreach (var format in Enum.GetValues<BestOfFormat>())
+                @* == Steg 1: Välj Spelare == *@
+                <fieldset class="space-y-2">
+                    <legend class="text-lg font-semibold mb-2 text-white">Välj Spelare</legend>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label for="player1" class="block text-sm font-medium text-gray-300">Spelare 1</label>
+                            <InputSelect id="player1" @bind-Value="newChallengeInput.Player1Id" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="">Välj spelare...</option>
+                                @if (allPlayers != null)
+                                {
+                                    @foreach (var player in allPlayers)
+                                    {
+                                        <option value="@player.Id">@player.Name (@player.Race)</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newChallengeInput.Player1Id)" />
+                        </div>
+                        <div class="flex-1">
+                            <label for="player2" class="block text-sm font-medium text-gray-300">Spelare 2</label>
+                            <InputSelect id="player2" @bind-Value="newChallengeInput.Player2Id" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="">Välj spelare...</option>
+                                @if (allPlayers != null)
+                                {
+                                    @* Filtrera bort den som valts som Spelare 1 *@
+                                    @foreach (var player in allPlayers.Where(p => p.Id != newChallengeInput.Player1Id))
+                                    {
+                                        <option value="@player.Id">@player.Name (@player.Race)</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newChallengeInput.Player2Id)" />
+                        </div>
+                    </div>
+                    @if (newChallengeInput.Player1Id != 0 && newChallengeInput.Player1Id == newChallengeInput.Player2Id)
                     {
-                        <option value="@format">@((int)format)</option>
+                        <p class="text-red-500 text-sm">Spelare 1 och Spelare 2 får inte vara samma person.</p>
                     }
-                </InputSelect>
-                <ValidationMessage For="@(() => newChallengeInput.SeriesFormat)" />
-            </div>
-        </fieldset>
+                </fieldset>
 
-        @* == Steg 3: Kartveto == *@
-        <fieldset class="space-y-2">
-            <legend class="text-lg font-semibold mb-2 text-white">Kart-veto</legend>
-            <p class="text-sm text-gray-400 mb-2">Varje spelare vetoar en karta från den aktuella kartpoolen.</p>
-            <div class="flex gap-4">
-                <div class="flex-1">
-                    <label for="veto1" class="block text-sm font-medium text-gray-300">@(player1Name)'s Veto</label>
-                    <InputSelect id="veto1" @bind-Value="newChallengeInput.Player1VetoMapId" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Ingen veto...</option>
-                        @if (availableMaps != null)
-                        {
-                            @foreach (var map in availableMaps)
+                @* == Steg 2: Välj Format == *@
+                <fieldset class="space-y-2">
+                    <legend class="text-lg font-semibold mb-2 text-white">Serieformat</legend>
+                    <div>
+                        <label for="format" class="block text-sm font-medium text-gray-300">Bäst av:</label>
+                        <InputSelect id="format" @bind-Value="newChallengeInput.SeriesFormat" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            @foreach (var format in Enum.GetValues<BestOfFormat>())
                             {
-                                <option value="@map.id">@map.Name</option>
+                                <option value="@format">@((int)format)</option>
                             }
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => newChallengeInput.Player1VetoMapId)" />
-                </div>
-                <div class="flex-1">
-                    <label for="veto2" class="block text-sm font-medium text-gray-300">@(player2Name)'s Veto</label>
-                    <InputSelect id="veto2" @bind-Value="newChallengeInput.Player2VetoMapId" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Ingen veto...</option>
-                        @if (availableMaps != null)
-                        {
-                            @* Filtrera bort den karta som Spelare 1 redan vetoat *@
-                            @foreach (var map in availableMaps.Where(m => m.id != newChallengeInput.Player1VetoMapId))
-                            {
-                                <option value="@map.id">@map.Name</option>
-                            }
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => newChallengeInput.Player2VetoMapId)" />
+                        </InputSelect>
+                        <ValidationMessage For="@(() => newChallengeInput.SeriesFormat)" />
+                    </div>
+                </fieldset>
+
+                @* == Steg 3: Kartveto == *@
+                <fieldset class="space-y-2">
+                    <legend class="text-lg font-semibold mb-2 text-white">Kart-veto</legend>
+                    <p class="text-sm text-gray-400 mb-2">Varje spelare vetoar en karta från den aktuella kartpoolen.</p>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label for="veto1" class="block text-sm font-medium text-gray-300">@(player1Name)'s Veto</label>
+                            <InputSelect id="veto1" @bind-Value="newChallengeInput.Player1VetoMapId" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="">Ingen veto...</option>
+                                @if (availableMaps != null)
+                                {
+                                    @foreach (var map in availableMaps)
+                                    {
+                                        <option value="@map.id">@map.Name</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newChallengeInput.Player1VetoMapId)" />
+                        </div>
+                        <div class="flex-1">
+                            <label for="veto2" class="block text-sm font-medium text-gray-300">@(player2Name)'s Veto</label>
+                            <InputSelect id="veto2" @bind-Value="newChallengeInput.Player2VetoMapId" class="mt-1 p-2 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="">Ingen veto...</option>
+                                @if (availableMaps != null)
+                                {
+                                    @* Filtrera bort den karta som Spelare 1 redan vetoat *@
+                                    @foreach (var map in availableMaps.Where(m => m.id != newChallengeInput.Player1VetoMapId))
+                                    {
+                                        <option value="@map.id">@map.Name</option>
+                                    }
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newChallengeInput.Player2VetoMapId)" />
+                        </div>
+                    </div>
+                    @* Manuell validering för att säkerställa att veto inte är samma *@
+                    @if (newChallengeInput.Player1VetoMapId.HasValue && newChallengeInput.Player1VetoMapId == newChallengeInput.Player2VetoMapId)
+                    {
+                        <p class="text-red-500 text-sm">Spelarna kan inte vetoa samma karta.</p>
+                    }
+                    @* Validering för att säkerställa tillräckligt antal kartor kvar *@
+                    @if (!HasEnoughMaps())
+                    {
+                        <p class="text-red-500 text-sm">För få kartor kvar i poolen efter veto för att spela Bäst av @((int)newChallengeInput.SeriesFormat)!</p>
+                    }
+                </fieldset>
+
+                @* == Steg 4: Skapa Utmaning == *@
+                <div>
+                    <button type="submit"
+                            disabled="@(!IsFormValid())"
+                            class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Skapa Utmaning
+                    </button>
                 </div>
             </div>
-            @* Manuell validering för att säkerställa att veto inte är samma *@
-            @if (newChallengeInput.Player1VetoMapId.HasValue && newChallengeInput.Player1VetoMapId == newChallengeInput.Player2VetoMapId)
-            {
-                <p class="text-red-500 text-sm">Spelarna kan inte vetoa samma karta.</p>
-            }
-            @* Validering för att säkerställa tillräckligt antal kartor kvar *@
-            @if (!HasEnoughMaps())
-            {
-                <p class="text-red-500 text-sm">För få kartor kvar i poolen efter veto för att spela Bäst av @((int)newChallengeInput.SeriesFormat)!</p>
-            }
-        </fieldset>
+        </EditForm>
+    </ChildContent>
 
-        @* == Steg 4: Skapa Utmaning == *@
-        <div>
-            <button type="submit"
-                    disabled="@(!IsFormValid())"
-                    class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                Skapa Utmaning
-            </button>
-        </div>
-    </div>
-</EditForm>
+</Page>
+
+
 
 @code {
     // Klass för att binda formulärdata
@@ -160,40 +164,27 @@
     protected override async Task OnInitializedAsync()
     {
         // Ladda spelare och kartor från dina tjänster/DBContext
-        // allPlayers = await PlayerService.GetAllPlayersAsync();
-        // availableMaps = await MapService.GetCurrentMapPoolAsync();
+        allPlayers = await PlayerService.GetAllPlayersAsync();
+        availableMaps = await MapService.GetAllMapssAsync();
 
-        // Exempeldata:
-        allPlayers = new List<Player> {
-            new Player { Id = 1, Name = "Serral", Race = FavouredRace.Zerg },
-            new Player { Id = 2, Name = "Maru", Race = FavouredRace.Terran },
-            new Player { Id = 3, Name = "ShoWTimE", Race = FavouredRace.Protoss },
-            new Player { Id = 4, Name = "Reynor", Race = FavouredRace.Zerg }
-         };
-        availableMaps = new List<Map> {
-            new Map { id = 1, Name = "Altitude" },
-            new Map { id = 2, Name = "Ancient Cistern" },
-            new Map { id = 3, Name = "Babylon" },
-            new Map { id = 4, Name = "Dragon Scales" },
-            new Map { id = 5, Name = "Gresvan" }
-         };
+       
     }
 
     private async Task HandleCreateChallenge()
     {
         if (!IsFormValid()) return; // Dubbelkolla validitet
 
-        // Skapa Challenge-objektet från input-modellen
-        // var challenge = new Challenge
-        //     {
-        //         Player1 = newChallengeInput.Player1Id,
-        //         Player2Id = newChallengeInput.Player2Id,
-        //         SeriesFormat = newChallengeInput.SeriesFormat,
-        //         Player1VetoMapId = newChallengeInput.Player1VetoMapId,
-        //         Player2VetoMapId = newChallengeInput.Player2VetoMapId,
-        //         Status = ChallengeStatus.ReadyToPlay, Eller PendingVeto om du vill ha det steget
-        //         CreationDate = DateTime.UtcNow
-        //     };
+
+            var challenge = new Challenge
+            {
+                Player1Id = newChallengeInput.Player1Id,
+                Player2Id = newChallengeInput.Player2Id,
+                SeriesFormat = newChallengeInput.SeriesFormat,
+                Player1VetoMapId = newChallengeInput.Player1VetoMapId,
+                Player2VetoMapId = newChallengeInput.Player2VetoMapId,
+                Status = ChallengeStatus.ReadyToPlay,
+                CreationDate = DateTime.UtcNow
+            };
 
         try
         {
