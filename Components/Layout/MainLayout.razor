@@ -1,0 +1,25 @@
+﻿@using StarcraftOrganizer.Components.Shared.Sidebar
+@inherits LayoutComponentBase
+
+@* Huvudbehållare med flexbox och full skärmhöjd *@
+<div class="flex h-screen bg-gradient-to-br from-[#0a0a23] via-[#1f1f3c] to-black text-white">
+
+  
+    <SideBar UserName="Test Användare" OnLinkClick="NotifyStateChanged" /> 
+  
+
+    @* Huvudinnehåll som tar upp resterande plats och är scrollbart *@
+    <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-2">
+        @Body
+    </main>
+</div>
+
+@code {
+    // Denna metod anropas från SideBar när en länk klickas.
+    // Används främst om du behöver tvinga en uppdatering av layouten,
+    // men ofta behövs det inte. Kan lämnas tom om onödig.
+    private void NotifyStateChanged()
+    {
+        // StateHasChanged(); // Avkommentera om du märker att layouten behöver uppdateras
+    }
+}

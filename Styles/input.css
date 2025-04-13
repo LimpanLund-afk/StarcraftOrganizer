@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@source inline("underline");
+@source "../.wwwroot/safelist-tailwindcss.txt";
+
+@theme {
+    --animate-fade-slide-scale: fade-slide-scale 0.4s ease-out;
+
+    @keyframes fade-slide-scale {
+        0% {
+            opacity: 0;
+            transform: translateX(-1rem) scale(0.95);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+}
+@layer components {
+    .hamburger {
+        @apply relative w-6 h-6 flex flex-col justify-between items-center;
+    }
+
+        .hamburger span {
+            @apply block h-0.5 w-full bg-white transition-all duration-300 ease-in-out;
+        }
+
+        .hamburger.open span:nth-child(1) {
+            @apply rotate-45 translate-y-1.5;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            @apply opacity-0;
+        }
+
+        .hamburger.open span:nth-child(3) {
+            @apply -rotate-45 -translate-y-1.5;
+        }
+}

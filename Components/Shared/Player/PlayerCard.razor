@@ -1,0 +1,31 @@
+﻿<div class="bg-gradient-to-r from-hsla(205, 88%, 45%, 1) to-hsla(259, 35%, 21%, 1) rounded-lg shadow-md p-4 m-4 min-w-full">
+    <div class="flex items-center mb-4">
+        <div class="text-xl font-semibold text-white mr-2">@PlayerName</div>
+        <div class="text-sm text-gray-400">@Race</div>
+    </div>
+    <div class="grid grid-cols-3 gap-2 text-sm text-gray-300">
+        <div>Vinster</div>
+        <div>Förluster</div>
+        <div>Vinstprocent</div>
+        <div class="text-white">@Wins</div>
+        <div class="text-white">@Losses</div>
+        <div class="text-white">@WinPercentage%</div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string PlayerName { get; set; }
+
+    [Parameter]
+    public string Race { get; set; }
+
+    [Parameter]
+    public int Wins { get; set; }
+
+    [Parameter]
+    public int Losses { get; set; }
+
+    [Parameter]
+    public int WinPercentage { get; set; }
+}

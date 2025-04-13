@@ -1,0 +1,121 @@
+﻿@* Hamburger Button - Använder fixed positionering för att vara relativ till viewporten, döljs på md+ *@
+<button @onclick="ToggleSidebar"
+        class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded-md shadow-lg backdrop-blur-sm">
+    @* Justerad styling & z-index *@
+    <div class="hamburger @(isSidebarOpen ? "open" : "")" aria-label="Växla meny" aria-expanded="@isSidebarOpen.ToString().ToLower()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</button>
+
+@* Sidebar Container 
+   - Mobil (< md): Fixed overlay, animeras med translate-x
+   - Desktop (md+): Blir static, tar sin plats i MainLayouts flexbox
+*@
+<div class="fixed top-0 left-0 z-50 h-screen w-64  @* Mobil: Fixed, full höjd (screen), standard bredd *@
+            bg-[#1f1f3c] shadow-lg @* Mörkare bakgrund som passar temat, skugga för overlay *@
+            transition-transform duration-300 ease-in-out
+            @(isSidebarOpen ? "translate-x-0" : "-translate-x-full") @* Mobil: Styr synlighet med translate *@
+            md:static  md:translate-x-0 md:shadow-none md:shrink-0">
+    @* Desktop: Static, full HÖJD relativt flex-parent (h-full), ingen translate, ingen skugga, krymp ej *@
+
+    @* Innehållsbehållare med padding och flex-kolumn för intern layout *@
+    <nav class="flex flex-col h-full p-4 text-white/90 overflow-y-auto">
+        @* Tillagd overflow-y-auto om innehållet blir för långt *@
+
+        @* Logo/Header (Exempel) *@
+        <div class="mb-8 text-center">
+            <img src="/Images/logo.png" alt="Logo" />
+        </div>
+
+        @* Navigationslänkar - Justerat utseende *@
+        <div class="flex flex-col">
+            <a href="/" class="block p-2 rounded hover:bg-white/10 transition-colors" @onclick="HandleLinkClick" @onclick:preventDefault>Home</a>
+            <a href="/counter" class="block p-2 rounded hover:bg-white/10 transition-colors" @onclick="HandleLinkClick" @onclick:preventDefault>Counter</a>
+            <a href="/weather" class="block p-2 rounded hover:bg-white/10 transition-colors" @onclick="HandleLinkClick" @onclick:preventDefault>Weather</a>
+        </div>
+
+        @* Konto längst ner - Använder mt-auto för att trycka ner detta block *@
+        <div class="mt-auto border-t border-white b-1 pt-4">
+            <div class="text-sm text-white/70 mb-2">
+                Inloggad som <strong>@UserName</strong>
+            </div>
+            <button @onclick="LogOut" class="w-full text-left p-2 rounded text-red-400 hover:text-red-300 hover:bg-white/10 transition-colors">
+                Logga ut
+            </button>
+        </div>
+    </nav>
+</div>
+
+@* CSS för hamburgare kan ligga här eller i en global fil *@
+<style>
+    .hamburger {
+        position: relative; /* Behåll relativ för span-positionering */
+        width: 24px;
+        height: 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .hamburger span {
+            display: block;
+            height: 3px; /* Lite tjockare kanske? */
+            width: 100%;
+            background-color: white; /* Säkerställ vit färg */
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border-radius: 1px; /* Mjuka kanter */
+        }
+        /* Animation när öppen */
+        .hamburger.open span:nth-child(1) {
+            transform: translateY(7.5px) rotate(45deg);
+        }
+
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: translateY(-7.5px) rotate(-45deg);
+        }
+</style>
+
+@code {
+    private bool isSidebarOpen = false;
+
+    [Parameter] public EventCallback OnLinkClick { get; set; }
+    [Parameter] public string UserName { get; set; } = "Användare";
+
+    private void ToggleSidebar()
+    {
+        isSidebarOpen = !isSidebarOpen;
+    }
+
+    // Hanterar klick på navigeringslänkar
+    private async Task HandleLinkClick()
+    {
+        // Stäng alltid sidopanelen på mobil när en länk klickas
+        if (isSidebarOpen)
+        {
+            // Manuell stängning behövs på mobil då den är fixed/overlay
+            // På desktop (md+) är den static och behöver inte stängas.
+            // Vi kan kolla skärmstorlek med JSInterop, men enklast är att bara stänga om den är öppen.
+            isSidebarOpen = false;
+        }
+        // Anropa förälderns callback (t.ex. för StateHasChanged i MainLayout)
+        await OnLinkClick.InvokeAsync();
+    }
+
+    private void LogOut()
+    {
+        // Din utloggningslogik här
+        Console.WriteLine("LogOut clicked");
+        // Kom ihåg att stänga sidopanelen om användaren loggar ut från mobilläge
+        if (isSidebarOpen)
+        {
+            isSidebarOpen = false;
+        }
+    }
+}
