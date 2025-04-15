@@ -24,7 +24,7 @@ namespace StarcraftOrganizer.Services
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Maps
-                .FirstOrDefaultAsync(m => m.id == Id);
+                .FirstOrDefaultAsync(m => m.Id == Id);
         }
 
         public async Task<List<Map>> SearchMapsByNameAsync(string namePart)

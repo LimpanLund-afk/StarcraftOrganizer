@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using StarcraftOrganizer.Components.Features.Challenges
 @using StarcraftOrganizer.Data.Entities
 @inject PlayerService PlayerService
 @inject MapService MapService 
@@ -7,15 +8,9 @@
 <Page>
     <ChildContent>
         <h1 class="text-3xl font-bold text-center p-4 mb-4">Test Your Might</h1>
-
-
         <EditForm Model="newChallengeInput" OnValidSubmit="HandleCreateChallenge">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
+            <DataAnnotationsValidator />       
             <div class="space-y-6 p-4 max-w-lg mx-auto bg-gray-800/50 rounded-lg shadow">
-
-                @* == Steg 1: Välj Spelare == *@
                 <fieldset class="space-y-2">
                     <legend class="text-lg font-semibold mb-2 text-white">Välj Spelare</legend>
                     <div class="flex gap-4">
@@ -39,7 +34,6 @@
                                 <option value="">Välj spelare...</option>
                                 @if (allPlayers != null)
                                 {
-                                    @* Filtrera bort den som valts som Spelare 1 *@
                                     @foreach (var player in allPlayers.Where(p => p.Id != newChallengeInput.Player1Id))
                                     {
                                         <option value="@player.Id">@player.Name (@player.Race)</option>
@@ -54,8 +48,6 @@
                         <p class="text-red-500 text-sm">Spelare 1 och Spelare 2 får inte vara samma person.</p>
                     }
                 </fieldset>
-
-                @* == Steg 2: Välj Format == *@
                 <fieldset class="space-y-2">
                     <legend class="text-lg font-semibold mb-2 text-white">Serieformat</legend>
                     <div>
@@ -83,7 +75,7 @@
                                 {
                                     @foreach (var map in availableMaps)
                                     {
-                                        <option value="@map.id">@map.Name</option>
+                                        <option value="@map.Id">@map.Name</option>
                                     }
                                 }
                             </InputSelect>
@@ -96,37 +88,48 @@
                                 @if (availableMaps != null)
                                 {
                                     @* Filtrera bort den karta som Spelare 1 redan vetoat *@
-                                    @foreach (var map in availableMaps.Where(m => m.id != newChallengeInput.Player1VetoMapId))
+                                    @foreach (var map in availableMaps.Where(m => m.Id != newChallengeInput.Player1VetoMapId))
                                     {
-                                        <option value="@map.id">@map.Name</option>
+                                        <option value="@map.Id">@map.Name</option>
                                     }
                                 }
                             </InputSelect>
                             <ValidationMessage For="@(() => newChallengeInput.Player2VetoMapId)" />
                         </div>
                     </div>
-                    @* Manuell validering för att säkerställa att veto inte är samma *@
                     @if (newChallengeInput.Player1VetoMapId.HasValue && newChallengeInput.Player1VetoMapId == newChallengeInput.Player2VetoMapId)
                     {
                         <p class="text-red-500 text-sm">Spelarna kan inte vetoa samma karta.</p>
                     }
-                    @* Validering för att säkerställa tillräckligt antal kartor kvar *@
                     @if (!HasEnoughMaps())
                     {
                         <p class="text-red-500 text-sm">För få kartor kvar i poolen efter veto för att spela Bäst av @((int)newChallengeInput.SeriesFormat)!</p>
                     }
                 </fieldset>
-
-                @* == Steg 4: Skapa Utmaning == *@
+                @if (IsFormValid())
+                {
+                    <div class="mt-4">
+                        <button type="button" 
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                        @onclick="GenerateRandomMaps">
+                            Generera Slumpmässiga Kartor
+                        </button>                     
+                    </div>
+                    @if (showMapComponent)
+                    {
+                        <MapOrderEditor @bind-SelectedMaps="selectedMaps" />
+                    }
+                }
                 <div>
                     <button type="submit"
-                            disabled="@(!IsFormValid())"
-                            class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    disabled="@(!IsFormValid())"
+                    class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
                         Skapa Utmaning
                     </button>
                 </div>
             </div>
         </EditForm>
+
     </ChildContent>
 
 </Page>
@@ -134,6 +137,7 @@
 
 
 @code {
+
     // Klass för att binda formulärdata
     private class ChallengeInputModel
     {
@@ -145,9 +149,8 @@
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Spelare 2 måste väljas.")]
         public int Player2Id { get; set; }
 
-        public BestOfFormat SeriesFormat { get; set; } = BestOfFormat.BestOf3; // Default värde
+        public BestOfFormat SeriesFormat { get; set; } = BestOfFormat.BestOf3; 
 
-        // Veto är valfritt (kan vara null), så ingen [Required] här
         public int? Player1VetoMapId { get; set; }
         public int? Player2VetoMapId { get; set; }
     }
@@ -155,6 +158,8 @@
     private ChallengeInputModel newChallengeInput = new();
     private List<Player>? allPlayers;
     private List<Map>? availableMaps;
+    private List<Map>? selectedMaps;
+    private bool showMapComponent { get; set; } = false;
 
     // Hämta namn för att visa i labels (bör uppdateras när spelare väljs)
     private string player1Name => allPlayers?.FirstOrDefault(p => p.Id == newChallengeInput.Player1Id)?.Name ?? "Spelare 1";
@@ -163,19 +168,18 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Ladda spelare och kartor från dina tjänster/DBContext
         allPlayers = await PlayerService.GetAllPlayersAsync();
         availableMaps = await MapService.GetAllMapssAsync();
 
-       
+
     }
 
     private async Task HandleCreateChallenge()
     {
-        if (!IsFormValid()) return; // Dubbelkolla validitet
+        if (!IsFormValid()) return; 
 
 
-            var challenge = new Challenge
+        var challenge = new Challenge
             {
                 Player1Id = newChallengeInput.Player1Id,
                 Player2Id = newChallengeInput.Player2Id,
@@ -188,22 +192,22 @@
 
         try
         {
-            // Spara till databasen via din tjänst/DbContext
-            // await ChallengeService.CreateChallengeAsync(challenge);
 
-            Console.WriteLine("Utmaning skapad!"); // Temporär feedback
+            await ChallengeService.AddAsync(challenge);
+
+
+
             // TODO: Navigera till en sida som visar utmaningen, eller rensa formuläret
             newChallengeInput = new(); // Rensa formuläret
-            StateHasChanged(); // Uppdatera UI
+            showMapComponent = false;
+            StateHasChanged(); 
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error creating challenge: {ex.Message}");
-            // TODO: Visa felmeddelande för användaren
+
         }
     }
-
-    // Hjälpmetoder för validering
     private bool HasEnoughMaps()
     {
         int requiredGames = newChallengeInput.SeriesFormat switch
@@ -217,9 +221,7 @@
         int mapsInPool = availableMaps?.Count ?? 0;
         int vetoes = 0;
         if (newChallengeInput.Player1VetoMapId.HasValue) vetoes++;
-        if (newChallengeInput.Player2VetoMapId.HasValue && newChallengeInput.Player1VetoMapId != newChallengeInput.Player2VetoMapId) vetoes++;
-
-        // Vi behöver minst lika många unika kartor kvar som det maximala antalet matcher i serien
+        if (newChallengeInput.Player2VetoMapId.HasValue && newChallengeInput.Player1VetoMapId != newChallengeInput.Player2VetoMapId) vetoes++; 
         int maxGamesInSeries = (int)newChallengeInput.SeriesFormat;
 
         return (mapsInPool - vetoes) >= maxGamesInSeries;
@@ -227,12 +229,26 @@
 
     private bool IsFormValid()
     {
-        // Grundläggande kontroller
+
         if (newChallengeInput.Player1Id == 0 || newChallengeInput.Player2Id == 0) return false;
         if (newChallengeInput.Player1Id == newChallengeInput.Player2Id) return false;
         if (newChallengeInput.Player1VetoMapId.HasValue && newChallengeInput.Player1VetoMapId == newChallengeInput.Player2VetoMapId) return false;
         if (!HasEnoughMaps()) return false;
 
-        return true; // Lägg till fler kontroller vid behov
+        return true; 
+    }
+
+
+
+    private void GenerateRandomMaps()
+    {
+        var mapsInPool = availableMaps!
+            .Where(m => m.Id != newChallengeInput.Player1VetoMapId && m.Id != newChallengeInput.Player2VetoMapId)
+            .OrderBy(_ => Guid.NewGuid())
+            .Take((int)newChallengeInput.SeriesFormat)
+            .ToList();
+
+        selectedMaps = mapsInPool;
+        showMapComponent = true;
     }
 }

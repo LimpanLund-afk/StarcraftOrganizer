@@ -1,0 +1,56 @@
+﻿@using Microsoft.AspNetCore.Components
+@using StarcraftOrganizer.Data.Entities
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    @foreach (var map in SelectedMaps)
+    {
+        <div class="border rounded shadow p-2 cursor-move bg-white"
+             draggable="true"
+             @ondragstart="@(() => OnDragStart(map))"
+             @ondragover="@OnDragOver"
+             @ondrop="@(() => OnDrop(map))">
+
+            <img src="@map.ImageUrl" alt="@map.Name" class="w-full rounded mb-2 shadow" />
+            <p class="text-center font-semibold">@map.Name</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<Map> SelectedMaps { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<List<Map>> SelectedMapsChanged { get; set; }
+
+    private Map? draggedMap;
+
+    private void OnDragStart(Map map)
+    {
+        draggedMap = map;
+    }
+
+    private async void OnDrop(Map targetMap)
+    {
+        if (draggedMap == null || draggedMap == targetMap)
+            return;
+
+        var fromIndex = SelectedMaps.IndexOf(draggedMap);
+        var toIndex = SelectedMaps.IndexOf(targetMap);
+
+        if (fromIndex >= 0 && toIndex >= 0)
+        {
+            SelectedMaps.RemoveAt(fromIndex);
+            SelectedMaps.Insert(toIndex, draggedMap);
+
+            await SelectedMapsChanged.InvokeAsync(SelectedMaps);
+        }
+
+        draggedMap = null;
+    }
+
+    private void OnDragOver(DragEventArgs e)
+    {
+       //Fråga mig inte
+    }
+}
