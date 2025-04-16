@@ -203,8 +203,8 @@
                 }).ToList();
 
             await ChallengeMapsService.AddAsync(challengeMaps);
-            // TODO: Navigera till en sida som visar utmaningen, eller rensa formuläret
-            newChallengeInput = new(); // Rensa formuläret
+            // TODO: Navigera till en sida som visar utmaningen
+            newChallengeInput = new(); 
             showMapComponent = false;
             StateHasChanged(); 
         }
@@ -219,9 +219,9 @@
         int requiredGames = newChallengeInput.SeriesFormat switch
         {
             BestOfFormat.BestOf1 => 1,
-            BestOfFormat.BestOf3 => 2, // Behöver minst 2 vinster = max 3 matcher
-            BestOfFormat.BestOf5 => 3, // Behöver minst 3 vinster = max 5 matcher
-            BestOfFormat.BestOf7 => 4, // Behöver minst 4 vinster = max 7 matcher
+            BestOfFormat.BestOf3 => 2, 
+            BestOfFormat.BestOf5 => 3, 
+            BestOfFormat.BestOf7 => 4,
             _ => 1
         };
         int mapsInPool = availableMaps?.Count ?? 0;

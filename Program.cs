@@ -12,6 +12,11 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("SQL")));
 
 
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>();
+
+
 
 #region ScopedServices
 
