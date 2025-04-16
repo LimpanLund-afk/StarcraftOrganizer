@@ -2,13 +2,21 @@
 @using StarcraftOrganizer.Data.Entities
 
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-    @foreach (var map in SelectedMaps)
+    @foreach (var map in AvailableMaps)
     {
-        <div class="border rounded shadow p-2 cursor-move bg-white"
-             draggable="true"
-             @ondragstart="@(() => OnDragStart(map))"
-             @ondragover="@OnDragOver"
-             @ondrop="@(() => OnDrop(map))">
+        var isSelected = SelectedMaps.Any(m => m.Id == map.Id);
+        <div class="relative border rounded shadow p-2 bg-black cursor-pointer transition duration-200
+                    @(isSelected ? "border-4 border-green-500" : "hover:border-gray-400")"
+             @onclick="@(() => ToggleMapSelection(map))">
+            @if (isSelected)
+            {
+                <div class="absolute top-1 right-1 rounded-full p-1 shadow">
+                    <!-- Bock-ikon (Heroicons / solid check) -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+            }
 
             <img src="@map.ImageUrl" alt="@map.Name" class="w-full rounded mb-2 shadow" />
             <p class="text-center font-semibold">@map.Name</p>
@@ -17,40 +25,31 @@
 </div>
 
 @code {
-    [Parameter]
+    [Parameter] 
+    public int MaxSelectable { get; set; }
+
+    [Parameter] 
+    public List<Map> AvailableMaps { get; set; } = new();
+
+
     public List<Map> SelectedMaps { get; set; } = new();
 
-    [Parameter]
+    [Parameter] 
     public EventCallback<List<Map>> SelectedMapsChanged { get; set; }
 
-    private Map? draggedMap;
-
-    private void OnDragStart(Map map)
+    // Exempel på väljande logik
+    private void ToggleMapSelection(Map map)
     {
-        draggedMap = map;
-    }
-
-    private async void OnDrop(Map targetMap)
-    {
-        if (draggedMap == null || draggedMap == targetMap)
-            return;
-
-        var fromIndex = SelectedMaps.IndexOf(draggedMap);
-        var toIndex = SelectedMaps.IndexOf(targetMap);
-
-        if (fromIndex >= 0 && toIndex >= 0)
+        if (SelectedMaps.Any() && SelectedMaps.Contains(map))
         {
-            SelectedMaps.RemoveAt(fromIndex);
-            SelectedMaps.Insert(toIndex, draggedMap);
-
-            await SelectedMapsChanged.InvokeAsync(SelectedMaps);
+            SelectedMaps.Remove(map);
+        }
+        else if (SelectedMaps.Count < MaxSelectable)
+        {
+            SelectedMaps.Add(map);
         }
 
-        draggedMap = null;
-    }
-
-    private void OnDragOver(DragEventArgs e)
-    {
-       //Fråga mig inte
+        SelectedMapsChanged.InvokeAsync(SelectedMaps);
     }
 }
+

@@ -4,6 +4,7 @@
 @inject PlayerService PlayerService
 @inject MapService MapService 
 @inject ChallengeService ChallengeService 
+@inject ChallengeMapsService ChallengeMapsService
 
 <Page>
     <ChildContent>
@@ -87,7 +88,6 @@
                                 <option value="">Ingen veto...</option>
                                 @if (availableMaps != null)
                                 {
-                                    @* Filtrera bort den karta som Spelare 1 redan vetoat *@
                                     @foreach (var map in availableMaps.Where(m => m.Id != newChallengeInput.Player1VetoMapId))
                                     {
                                         <option value="@map.Id">@map.Name</option>
@@ -108,16 +108,16 @@
                 </fieldset>
                 @if (IsFormValid())
                 {
-                    <div class="mt-4">
+                    <div class="mt-4 flex justify-center">
                         <button type="button" 
-                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-auto"
                         @onclick="GenerateRandomMaps">
                             Generera Slumpmässiga Kartor
                         </button>                     
                     </div>
                     @if (showMapComponent)
                     {
-                        <MapOrderEditor @bind-SelectedMaps="selectedMaps" />
+                        <MapOrderEditor MaxSelectable="(int)newChallengeInput.SeriesFormat" AvailableMaps="GetFilteredMaps()" SelectedMapsChanged="UpdateChallengMaps" />
                     }
                 }
                 <div>
@@ -158,7 +158,7 @@
     private ChallengeInputModel newChallengeInput = new();
     private List<Player>? allPlayers;
     private List<Map>? availableMaps;
-    private List<Map>? selectedMaps;
+    private List<Map>? selectedMaps = new();
     private bool showMapComponent { get; set; } = false;
 
     // Hämta namn för att visa i labels (bör uppdateras när spelare väljs)
@@ -180,23 +180,29 @@
 
 
         var challenge = new Challenge
-            {
-                Player1Id = newChallengeInput.Player1Id,
-                Player2Id = newChallengeInput.Player2Id,
-                SeriesFormat = newChallengeInput.SeriesFormat,
-                Player1VetoMapId = newChallengeInput.Player1VetoMapId,
-                Player2VetoMapId = newChallengeInput.Player2VetoMapId,
-                Status = ChallengeStatus.ReadyToPlay,
-                CreationDate = DateTime.UtcNow
-            };
+        {
+            Player1Id = newChallengeInput.Player1Id,
+            Player2Id = newChallengeInput.Player2Id,
+            SeriesFormat = newChallengeInput.SeriesFormat,
+            Player1VetoMapId = newChallengeInput.Player1VetoMapId,
+            Player2VetoMapId = newChallengeInput.Player2VetoMapId,
+            Status = ChallengeStatus.ReadyToPlay,
+            CreationDate = DateTime.UtcNow
+        };
+
 
         try
         {
 
             await ChallengeService.AddAsync(challenge);
 
+            var challengeMaps = selectedMaps.Select(map => new ChallengeMaps
+                {
+                    ChallengeId = challenge.Id,
+                    MapId = map.Id
+                }).ToList();
 
-
+            await ChallengeMapsService.AddAsync(challengeMaps);
             // TODO: Navigera till en sida som visar utmaningen, eller rensa formuläret
             newChallengeInput = new(); // Rensa formuläret
             showMapComponent = false;
@@ -247,8 +253,17 @@
             .OrderBy(_ => Guid.NewGuid())
             .Take((int)newChallengeInput.SeriesFormat)
             .ToList();
-
-        selectedMaps = mapsInPool;
         showMapComponent = true;
+    }
+
+    private List<Map> GetFilteredMaps()
+    {
+        return availableMaps?
+            .Where(m => m.Id != newChallengeInput.Player1VetoMapId && m.Id != newChallengeInput.Player2VetoMapId)
+            .ToList() ?? new List<Map>();
+    }
+    private void UpdateChallengMaps(List<Map> mapsToPlay)
+    {
+        selectedMaps = mapsToPlay;
     }
 }

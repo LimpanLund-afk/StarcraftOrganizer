@@ -19,6 +19,7 @@ builder.Services.AddScoped<PlayerService, PlayerService>();
 builder.Services.AddScoped<MatchService, MatchService>();
 builder.Services.AddScoped<MapService, MapService>();
 builder.Services.AddScoped<ChallengeService, ChallengeService>();
+builder.Services.AddScoped<ChallengeMapsService, ChallengeMapsService>();
 
 
 #endregion
