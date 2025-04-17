@@ -5,6 +5,7 @@ using StarcraftOrganizer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -12,9 +13,6 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("SQL")));
 
 
-builder.Configuration
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddUserSecrets<Program>();
 
 
 
