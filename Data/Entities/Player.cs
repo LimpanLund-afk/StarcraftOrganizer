@@ -1,6 +1,4 @@
-﻿using static StarcraftOrganizer.Data.Entities.Player;
-
-namespace StarcraftOrganizer.Data.Entities
+﻿namespace StarcraftOrganizer.Data.Entities
 {
     public class Player
     {
