@@ -1,11 +1,26 @@
 ﻿@page "/Players"
+@using StarcraftOrganizer.Components.Shared.Player
+@using StarcraftOrganizer.Data.Entities
+@inject PlayerService _PlayerService;
+
 
 <Page Title="Spelare">
     <ChildContent>
+        @foreach (var player in Players)
+        {
+            <PlayerCard Player="player" />
+        }
 
     </ChildContent>
 </Page>
 
 @code {
 
+    public List<Player> Players { get; set; } = new List<Player>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Players = await _PlayerService.GetAllPlayersAsync();
+
+    }
 }

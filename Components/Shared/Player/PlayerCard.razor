@@ -1,7 +1,11 @@
-﻿<div class="bg-gradient-to-r from-hsla(205, 88%, 45%, 1) to-hsla(259, 35%, 21%, 1) rounded-lg shadow-md p-4 m-4 min-w-full">
+﻿@using StarcraftOrganizer.Data.Entities
+@inject MatchService MatchService;
+
+
+<div class="bg-gradient-to-r from-hsla(205, 88%, 45%, 1) to-hsla(259, 35%, 21%, 1) rounded-lg shadow-md p-4 m-4 min-w-full">
     <div class="flex items-center mb-4">
-        <div class="text-xl font-semibold text-white mr-2">@PlayerName</div>
-        <div class="text-sm text-gray-400">@Race</div>
+        <div class="text-xl font-semibold text-white mr-2">@Player.Name</div>
+        <div class="text-sm text-gray-400">@Player.Race</div>
     </div>
     <div class="grid grid-cols-3 gap-2 text-sm text-gray-300">
         <div>Vinster</div>
@@ -15,17 +19,37 @@
 
 @code {
     [Parameter]
-    public string PlayerName { get; set; }
+    public Player? Player { get; set; }
 
-    [Parameter]
-    public string Race { get; set; }
-
-    [Parameter]
     public int Wins { get; set; }
 
-    [Parameter]
     public int Losses { get; set; }
 
-    [Parameter]
     public int WinPercentage { get; set; }
+
+    public List<Match> TotalAmountMatches { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Player != null)
+        {
+            TotalAmountMatches = await MatchService.GetMatchesByPlayerIdAsync(Player.Id);
+        }
+
+        Wins = TotalAmountMatches.Count(m =>
+            (m.Player1Id == Player.Id && m.Player1Won) ||
+            (m.Player2Id == Player.Id && !m.Player1Won)
+        );
+
+        Losses = TotalAmountMatches.Count(m =>
+            (m.Player1Id == Player.Id && !m.Player1Won) ||
+            (m.Player2Id == Player.Id && m.Player1Won)
+        );
+
+        int totalPlayed = Wins + Losses;
+        WinPercentage = totalPlayed > 0
+            ? (int)Math.Round((double)Wins / totalPlayed * 100)
+            : 0;
+
+    }
 }
