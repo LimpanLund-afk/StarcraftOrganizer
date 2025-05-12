@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StarcraftOrganizer.Components;
 using StarcraftOrganizer.Data.DataContext;
+using StarcraftOrganizer.Data.Entities;
 using StarcraftOrganizer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +15,11 @@ builder.Services.AddRazorComponents()
 var connectionString = builder.Configuration.GetConnectionString("SQL");
 builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(connectionString));
 
-
+builder.Services.AddDefaultIdentity<Player>(options => {
+    options.SignIn.RequireConfirmedAccount = false;
+})
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<DataContext>();
 
 
 
@@ -50,3 +56,22 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+// Seed the database with roles
+async Task SeedRolesAsync(IServiceProvider serviceProvider)
+{
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    string[] roles = { "Admin", "User" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    await SeedRolesAsync(scope.ServiceProvider);
+}

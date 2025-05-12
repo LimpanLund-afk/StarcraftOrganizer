@@ -1,8 +1,10 @@
-﻿namespace StarcraftOrganizer.Data.Entities
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace StarcraftOrganizer.Data.Entities
 {
-    public class Player
+    public class Player : IdentityUser
     {
-        public int Id { get; set; }
+
         public string Name { get; set; }
         public FavouredRace Race { get; set; }
 

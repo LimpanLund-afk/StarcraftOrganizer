@@ -44,7 +44,7 @@
                             <ValidationMessage For="@(() => newChallengeInput.Player2Id)" />
                         </div>
                     </div>
-                    @if (newChallengeInput.Player1Id != 0 && newChallengeInput.Player1Id == newChallengeInput.Player2Id)
+                    @if (newChallengeInput.Player1Id != null && newChallengeInput.Player1Id == newChallengeInput.Player2Id)
                     {
                         <p class="text-red-500 text-sm">Spelare 1 och Spelare 2 får inte vara samma person.</p>
                     }
@@ -143,11 +143,11 @@
     {
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Spelare 1 måste väljas.")]
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Spelare 1 måste väljas.")]
-        public int Player1Id { get; set; }
+        public string Player1Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Spelare 2 måste väljas.")]
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Spelare 2 måste väljas.")]
-        public int Player2Id { get; set; }
+        public string Player2Id { get; set; }
 
         public BestOfFormat SeriesFormat { get; set; } = BestOfFormat.BestOf3; 
 
@@ -236,7 +236,7 @@
     private bool IsFormValid()
     {
 
-        if (newChallengeInput.Player1Id == 0 || newChallengeInput.Player2Id == 0) return false;
+        if (newChallengeInput.Player1Id == null || newChallengeInput.Player2Id == null) return false;
         if (newChallengeInput.Player1Id == newChallengeInput.Player2Id) return false;
         if (newChallengeInput.Player1VetoMapId.HasValue && newChallengeInput.Player1VetoMapId == newChallengeInput.Player2VetoMapId) return false;
         if (!HasEnoughMaps()) return false;

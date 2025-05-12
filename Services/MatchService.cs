@@ -28,7 +28,7 @@ namespace StarcraftOrganizer.Services
                 .ToListAsync();
         }
 
-        public async Task<List<Match>> GetMatchesByPlayerIdAsync(int playerId)
+        public async Task<List<Match>> GetMatchesByPlayerIdAsync(string playerId)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Matches

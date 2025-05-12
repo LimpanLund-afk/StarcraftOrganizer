@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StarcraftOrganizer.Data.Entities;
 using Challenge = StarcraftOrganizer.Data.Entities.Challenge;
 
 namespace StarcraftOrganizer.Data.DataContext
 {
-    public class DataContext : DbContext
+    public class DataContext : IdentityDbContext<Player>
     {
-        public DataContext(DbContextOptions options) : base(options)
-        {
-        }
+        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public DbSet<Map> Maps {get;set;} = null!;
         public DbSet<Player> Players { get; set; } = null!;
@@ -20,7 +20,7 @@ namespace StarcraftOrganizer.Data.DataContext
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-
+            base.OnModelCreating(modelBuilder);
 
             // CHALLENGE → PLAYER
             modelBuilder.Entity<Challenge>()

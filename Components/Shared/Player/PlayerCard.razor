@@ -37,9 +37,9 @@
         }
 
         Wins = TotalAmountMatches.Count(m =>
-            (m.Player1Id == Player.Id && m.Player1Won) ||
-            (m.Player2Id == Player.Id && !m.Player1Won)
-        );
+     (m.Player1Id == Player.Id && m.Player1Won) ||
+     (m.Player2Id == Player.Id && !m.Player1Won)
+     );
 
         Losses = TotalAmountMatches.Count(m =>
             (m.Player1Id == Player.Id && !m.Player1Won) ||
