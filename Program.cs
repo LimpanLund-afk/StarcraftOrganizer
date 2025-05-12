@@ -10,7 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("SQL")));
+var connectionString = builder.Configuration.GetConnectionString("SQL");
+builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(connectionString));
+
+
 
 
 
