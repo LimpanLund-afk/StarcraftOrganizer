@@ -37,6 +37,12 @@ builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login"; 
+    options.AccessDeniedPath = "/denied"; 
+});
+
 #endregion
 
 var app = builder.Build();

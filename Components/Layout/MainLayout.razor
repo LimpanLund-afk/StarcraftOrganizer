@@ -8,22 +8,21 @@
 
 @inherits LayoutComponentBase
 
+<div class="flex h-screen bg-gradient-to-br from-[#0a0a23] via-[#1f1f3c] to-black text-white">
     <AuthorizeView>
         <Authorized>
-            <div class="flex h-screen bg-gradient-to-br from-[#0a0a23] via-[#1f1f3c] to-black text-white">
+            <SideBar SignedInPlayer="SignedInPlayer" />
+        </Authorized>
+        <NotAuthorized>
 
-                <SideBar SignedInPlayer="SignedInPlayer" />
-
-            <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-2">
-                    @Body
-                </main>
-            </div>
-    </Authorized>
-     <NotAuthorized>
-            <a href="/login">Logga in</a> |
-            <a href="/register">Registrera</a>
         </NotAuthorized>
     </AuthorizeView>
+
+    <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-2">
+        @Body
+    </main>
+</div>
+
 @code {
 
     [Inject]    

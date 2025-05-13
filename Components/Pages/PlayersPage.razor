@@ -1,8 +1,10 @@
 ﻿@page "/Players"
+@using Microsoft.AspNetCore.Authorization
 @using StarcraftOrganizer.Components.Shared.PlayerComponents
 @using StarcraftOrganizer.Data.Entities
 @inject PlayerService _PlayerService;
 
+@attribute [Authorize]
 
 <Page Title="Spelare">
     <ChildContent>

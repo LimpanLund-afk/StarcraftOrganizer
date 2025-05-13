@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
 @using StarcraftOrganizer.Components.Features.Challenges
 @using StarcraftOrganizer.Data.Entities
 @inject PlayerService PlayerService
@@ -6,6 +7,7 @@
 @inject ChallengeService ChallengeService 
 @inject ChallengeMapsService ChallengeMapsService
 
+@attribute [Authorize]
 <Page>
     <ChildContent>
         <h1 class="text-3xl font-bold text-center p-4 mb-4">Test Your Might</h1>
