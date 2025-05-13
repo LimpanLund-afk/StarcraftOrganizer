@@ -32,7 +32,10 @@ builder.Services.AddScoped<MatchService, MatchService>();
 builder.Services.AddScoped<MapService, MapService>();
 builder.Services.AddScoped<ChallengeService, ChallengeService>();
 builder.Services.AddScoped<ChallengeMapsService, ChallengeMapsService>();
+builder.Services.AddScoped<CurrentUserService>();
 
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 
 #endregion
 

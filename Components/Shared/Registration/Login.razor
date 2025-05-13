@@ -1,0 +1,37 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.Identity
+@using StarcraftOrganizer.Data.Entities
+
+@inject SignInManager<Player> SignInManager
+@inject NavigationManager NavigationManager
+
+<Page>
+    <ChildContent>
+        <h3>Logga in</h3>
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <InputText @bind-Value="loginModel.UserName" placeholder="Användarnamn" />
+            <InputText @bind-Value="loginModel.Password" type="password" placeholder="Lösenord" />
+            <button type="submit">Logga in</button>
+        </EditForm>      
+    </ChildContent>
+</Page>
+
+@code {
+    private LoginModel loginModel = new();
+
+    private async Task HandleLogin()
+    {
+        var result = await SignInManager.PasswordSignInAsync(loginModel.UserName, loginModel.Password, isPersistent: false, false);
+        if (result.Succeeded)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private class LoginModel
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
+    }
+ }

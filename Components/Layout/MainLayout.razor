@@ -1,22 +1,50 @@
-﻿@using StarcraftOrganizer.Components.Shared.Sidebar
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@using StarcraftOrganizer.Components.Shared.Sidebar
+@using StarcraftOrganizer.Data.Entities
+@inject UserManager<Player> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject CurrentUserService CurrentUserService
+
 @inherits LayoutComponentBase
 
+    <AuthorizeView>
+        <Authorized>
+            <div class="flex h-screen bg-gradient-to-br from-[#0a0a23] via-[#1f1f3c] to-black text-white">
 
-<div class="flex h-screen bg-gradient-to-br from-[#0a0a23] via-[#1f1f3c] to-black text-white">
+                <SideBar SignedInPlayer="SignedInPlayer" />
 
-  
-    <SideBar UserName="Test Användare" /> 
- 
-    <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-2">
-        @Body
-    </main>
-</div>
-
+            <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-2">
+                    @Body
+                </main>
+            </div>
+    </Authorized>
+     <NotAuthorized>
+            <a href="/login">Logga in</a> |
+            <a href="/register">Registrera</a>
+        </NotAuthorized>
+    </AuthorizeView>
 @code {
 
+    [Inject]    
+    SignInManager<Player> SignInManager { get; set; }
+
+    [Inject]   
+    NavigationManager NavigationManager { get; set; }
 
 
+    private Player? SignedInPlayer;
 
+    private async Task Logout()
+    {
+        await SignInManager.SignOutAsync();
+        NavigationManager.NavigateTo("/");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SignedInPlayer = await CurrentUserService.GetCurrentUserAsync();
+    }
 
     private void NotifyStateChanged()
     {

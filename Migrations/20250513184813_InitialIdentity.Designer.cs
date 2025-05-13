@@ -12,8 +12,8 @@ using StarcraftOrganizer.Data.DataContext;
 namespace StarcraftOrganizer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250512195801_AddIdentityAndPlayer")]
-    partial class AddIdentityAndPlayer
+    [Migration("20250513184813_InitialIdentity")]
+    partial class InitialIdentity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
