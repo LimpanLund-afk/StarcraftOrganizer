@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StarcraftOrganizer.Components;
 using StarcraftOrganizer.Data.DataContext;
 using StarcraftOrganizer.Data.Entities;
+using StarcraftOrganizer.Infra;
 using StarcraftOrganizer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,35 +18,24 @@ builder.Services.AddRazorComponents()
 var connectionString = builder.Configuration.GetConnectionString("SQL");
 builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<Player>(options => {
-    options.SignIn.RequireConfirmedAccount = false;
-})
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<DataContext>();
-
-
-
-
+// Auth
+builder.Services.AddScoped<ProtectedLocalStorage>();
+builder.Services.AddScoped<AuthenticationStateProvider, CoreAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddAuthorizationCore();
 
 #region ScopedServices
-
-builder.Services.AddScoped<PlayerService, PlayerService>();
-builder.Services.AddScoped<MatchService, MatchService>();
-builder.Services.AddScoped<MapService, MapService>();
-builder.Services.AddScoped<ChallengeService, ChallengeService>();
-builder.Services.AddScoped<ChallengeMapsService, ChallengeMapsService>();
-builder.Services.AddScoped<CurrentUserService>();
-
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/login"; 
-    options.AccessDeniedPath = "/denied"; 
-});
-
+builder.Services.AddScoped<PlayerService>();
+builder.Services.AddScoped<MatchService>();
+builder.Services.AddScoped<MapService>();
+builder.Services.AddScoped<ChallengeService>();
+builder.Services.AddScoped<ChallengeMapsService>();
 #endregion
+
+
+
+
+
 
 var app = builder.Build();
 
@@ -65,22 +57,3 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
-// Seed the database with roles
-async Task SeedRolesAsync(IServiceProvider serviceProvider)
-{
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    string[] roles = { "Admin", "User" };
-
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    await SeedRolesAsync(scope.ServiceProvider);
-}

@@ -1,14 +1,14 @@
 ﻿@page "/register"
-
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Identity
-@using StarcraftOrganizer.Data.Entities
-
-@inject UserManager<Player> UserManager
-@inject SignInManager<Player> SignInManager
-@inject NavigationManager NavigationManager
-
+@using Microsoft.EntityFrameworkCore
+@using StarcraftOrganizer.Data.DataContext
+@using StarcraftOrganizer.Infra
+@using System.ComponentModel.DataAnnotations
 @attribute [AllowAnonymous]
+
+@inject NavigationManager NavigationManager
+@inject AuthService AuthService
+@inject IDbContextFactory<DataContext> DbContextFactory
 
 <Page>
     <ChildContent>
@@ -16,19 +16,27 @@
 
         <div class="flex items-center justify-center min-h-screen">
             <div class="w-full max-w-md p-8 bg-opacity-0 rounded shadow-md">
-                <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
-                    <div class="mb-8">
+                <EditForm Model="@registerModel" OnValidSubmit="HandleRegister" EditContext="@editContext">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Användarnamn</label>
                         <InputText @bind-Value="registerModel.UserName" class="w-full px-4 py-2 border border-gray-600 bg-transparent text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <ValidationMessage For="@(() => registerModel.UserName)" />
                     </div>
-                    <div class="mb-8">
-                        <label class="block text-sm font-medium mb-1">E-postadress</label>
-                        <InputText @bind-Value="registerModel.Email" type="email" class="w-full px-4 py-2 border border-gray-600 bg-transparent text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                    <div class="mb-8">
+
+                    <div class="mb-4">
                         <label class="block text-sm font-medium mb-1">Lösenord</label>
                         <InputText @bind-Value="registerModel.Password" type="password" class="w-full px-4 py-2 border border-gray-600 bg-transparent text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <ValidationMessage For="@(() => registerModel.Password)" />
                     </div>
+
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="mb-4 text-red-500 font-semibold">@ErrorMessage</div>
+                    }
+
                     <div class="flex flex-col justify-center">
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-auto hover:cursor-pointer">
                             Registrera dig
@@ -47,33 +55,71 @@
 
 @code {
     private RegisterModel registerModel = new();
+    private EditContext editContext;
+    private string? ErrorMessage;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(registerModel);
+    }
 
     private async Task HandleRegister()
     {
-        var user = new Player
-            {
-                UserName = registerModel.UserName,
-                Email = registerModel.Email
-            };
+        ErrorMessage = null;
 
-        var result = await UserManager.CreateAsync(user, registerModel.Password);
-
-        if (result.Succeeded)
-        {
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            NavigationManager.NavigateTo("/");
+        if (!editContext.Validate())
+        {     
+            return;
         }
-        else
+
+        try
         {
-            Console.WriteLine("AJ AJ AJ");
+            using var context = await DbContextFactory.CreateDbContextAsync();
+
+            var existingUser = await context.Players.FirstOrDefaultAsync(p => p.UserName == registerModel.UserName);
+            if (existingUser != null)
+            {
+                ErrorMessage = "Användarnamnet är redan upptaget, pucko";
+                return;
+            }
+
+            var salt = Hash.GenerateSalt();
+            var hashedPassword = Hash.GetHash(registerModel.Password + salt, Hash.HashType.SHA256);
+
+            var player = new Player
+                {
+                    UserName = registerModel.UserName,
+                    Password = hashedPassword,
+                    Salt = salt
+                };
+
+            context.Players.Add(player);
+            await context.SaveChangesAsync();
+
+            var loginSuccess = await AuthService.Login(registerModel.UserName, registerModel.Password);
+            if (loginSuccess)
+            {
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                ErrorMessage = "Du borde be om ursäkt till alla växter vars syre du slösar";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Ett oväntat fel inträffade, bitch " + ex.Message;
         }
     }
 
-
-    private class RegisterModel
+    public class RegisterModel
     {
-        public string UserName { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        [Required(ErrorMessage = "Användarnamn krävs.")]
+        [MinLength(3, ErrorMessage = "Användarnamn måste vara minst 3 tecken.")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Lösenord krävs.")]
+        [MinLength(6, ErrorMessage = "Lösenord måste vara minst 6 tecken.")]
+        public string Password { get; set; } = string.Empty;
     }
 }

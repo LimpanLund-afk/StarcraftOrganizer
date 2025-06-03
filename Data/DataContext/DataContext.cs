@@ -1,15 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using StarcraftOrganizer.Data.Entities;
 using Challenge = StarcraftOrganizer.Data.Entities.Challenge;
 
 namespace StarcraftOrganizer.Data.DataContext
 {
-    public class DataContext : IdentityDbContext<Player>
+    public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
-
         public DbSet<Map> Maps {get;set;} = null!;
         public DbSet<Player> Players { get; set; } = null!;
         public DbSet<Match> Matches { get; set; } = null!;

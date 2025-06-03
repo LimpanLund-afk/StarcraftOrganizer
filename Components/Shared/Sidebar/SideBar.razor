@@ -3,7 +3,7 @@
 
 
 <button @onclick="ToggleSidebar"
-        class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded-md shadow-lg backdrop-blur-sm">
+class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded-md shadow-lg backdrop-blur-sm">
     <div class="hamburger @(isSidebarOpen ? "open" : "")" aria-label="Växla meny" aria-expanded="@isSidebarOpen.ToString().ToLower()">
         <span></span>
         <span></span>
@@ -19,12 +19,12 @@
             md:static  md:translate-x-0 md:shadow-none md:shrink-0">
 
     <nav class="flex flex-col h-full p-4 text-white/90 overflow-y-auto">
-  
+
         <div class="mb-8 text-center">
             <img src="/Images/logo.png" alt="Logo" />
         </div>
 
-       
+
         <div class="flex flex-col">
             <a href="/" class="block p-2 rounded hover:bg-white/10 transition-colors" @onclick='() =>HandleLinkClick("/")' @onclick:preventDefault>Home</a>
             <a href="/Players" class="block p-2 rounded hover:bg-white/10 transition-colors" @onclick='() =>HandleLinkClick("/Players")' @onclick:preventDefault>Spelare</a>
@@ -34,7 +34,7 @@
 
         <div class="mt-auto border-t border-white b-1 pt-4">
             <div class="text-sm text-white/70 mb-2">
-                Inloggad som <strong>@SignedInPlayer.Name</strong>
+                Inloggad som <strong>@SignedInPlayer.UserName</strong>
             </div>
             <button @onclick="LogOut" class="w-full text-left p-2 rounded text-red-400 hover:text-red-300 hover:bg-white/10 transition-colors">
                 Logga ut
@@ -46,35 +46,35 @@
 
 <style>
     .hamburger {
-        position: relative; 
-        width: 24px;
-        height: 18px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
+    position: relative; 
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
     }
 
-        .hamburger span {
-            display: block;
-            height: 3px; 
-            width: 100%;
-            background-color: white; 
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            border-radius: 1px; 
-        }
-        
-        .hamburger.open span:nth-child(1) {
-            transform: translateY(7.5px) rotate(45deg);
-        }
+    .hamburger span {
+    display: block;
+    height: 3px; 
+    width: 100%;
+    background-color: white; 
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    border-radius: 1px; 
+    }
 
-        .hamburger.open span:nth-child(2) {
-            opacity: 0;
-        }
+    .hamburger.open span:nth-child(1) {
+    transform: translateY(7.5px) rotate(45deg);
+    }
 
-        .hamburger.open span:nth-child(3) {
-            transform: translateY(-7.5px) rotate(-45deg);
-        }
+    .hamburger.open span:nth-child(2) {
+    opacity: 0;
+    }
+
+    .hamburger.open span:nth-child(3) {
+    transform: translateY(-7.5px) rotate(-45deg);
+    }
 </style>
 
 @code {
@@ -84,6 +84,9 @@
 
     [Parameter] 
     public Player? SignedInPlayer { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnLogout { get; set; }
 
     private void ToggleSidebar()
     {
@@ -104,8 +107,7 @@
 
     private void LogOut()
     {
-
-        Console.WriteLine("LogOut clicked");
+        OnLogout.InvokeAsync(true);
 
         if (isSidebarOpen)
         {

@@ -66,7 +66,7 @@ namespace StarcraftOrganizer.Services
             }
         }
 
-        public async Task<List<Challenge>> GetChallengesByPlayerIdAsync(string playerId)
+        public async Task<List<Challenge>> GetChallengesByPlayerIdAsync(int playerId)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Challenges

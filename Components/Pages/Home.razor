@@ -25,7 +25,7 @@
                                 {
                                     @foreach (var player in allPlayers)
                                     {
-                                        <option value="@player.Id">@player.Name (@player.Race)</option>
+                                        <option value="@player.Id">@player.UserName (@player.Race)</option>
                                     }
                                 }
                             </InputSelect>
@@ -39,7 +39,7 @@
                                 {
                                     @foreach (var player in allPlayers.Where(p => p.Id != newChallengeInput.Player1Id))
                                     {
-                                        <option value="@player.Id">@player.Name (@player.Race)</option>
+                                        <option value="@player.Id">@player.UserName (@player.Race)</option>
                                     }
                                 }
                             </InputSelect>
@@ -145,11 +145,11 @@
     {
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Spelare 1 måste väljas.")]
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Spelare 1 måste väljas.")]
-        public string Player1Id { get; set; }
+        public int Player1Id { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Spelare 2 måste väljas.")]
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = "Spelare 2 måste väljas.")]
-        public string Player2Id { get; set; }
+        public int Player2Id { get; set; }
 
         public BestOfFormat SeriesFormat { get; set; } = BestOfFormat.BestOf3; 
 
@@ -164,8 +164,8 @@
     private bool showMapComponent { get; set; } = false;
 
     // Hämta namn för att visa i labels (bör uppdateras när spelare väljs)
-    private string player1Name => allPlayers?.FirstOrDefault(p => p.Id == newChallengeInput.Player1Id)?.Name ?? "Spelare 1";
-    private string player2Name => allPlayers?.FirstOrDefault(p => p.Id == newChallengeInput.Player2Id)?.Name ?? "Spelare 2";
+    private string player1Name => allPlayers?.FirstOrDefault(p => p.Id == newChallengeInput.Player1Id)?.UserName ?? "Spelare 1";
+    private string player2Name => allPlayers?.FirstOrDefault(p => p.Id == newChallengeInput.Player2Id)?.UserName ?? "Spelare 2";
 
 
     protected override async Task OnInitializedAsync()

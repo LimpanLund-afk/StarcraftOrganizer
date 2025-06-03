@@ -21,7 +21,7 @@ namespace StarcraftOrganizer.Services
             return await context.Players.ToListAsync();
         }
 
-        public async Task<Player?> GetPlayerByIdAsync(string id)
+        public async Task<Player?> GetPlayerByIdAsync(int id)
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Players
@@ -32,8 +32,8 @@ namespace StarcraftOrganizer.Services
         {
             using var context = await _contextFactory.CreateDbContextAsync();
             return await context.Players
-                .Where(p => p.Name.Contains(namePart))
-                .OrderBy(p => p.Name)
+                .Where(p => p.UserName.Contains(namePart))
+                .OrderBy(p => p.UserName)
                 .ToListAsync();
         }
 
