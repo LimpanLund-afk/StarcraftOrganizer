@@ -6,11 +6,16 @@ namespace StarcraftOrganizer.Data.DataContext
 {
     public class DataContext : DbContext
     {
+        public DataContext(DbContextOptions<DataContext> options) : base(options)
+        {
+        }
+
         public DbSet<Map> Maps {get;set;} = null!;
         public DbSet<Player> Players { get; set; } = null!;
         public DbSet<Match> Matches { get; set; } = null!;
         public DbSet<Challenge> Challenges { get; set; } = null!;
         public DbSet<ChallengeMaps> ChallengeMaps { get; set; } = null!;
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

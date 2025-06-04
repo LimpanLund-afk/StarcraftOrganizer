@@ -1,12 +1,12 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StarcraftOrganizer.Components;
 using StarcraftOrganizer.Data.DataContext;
-using StarcraftOrganizer.Data.Entities;
 using StarcraftOrganizer.Infra;
 using StarcraftOrganizer.Services;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,11 +18,14 @@ builder.Services.AddRazorComponents()
 var connectionString = builder.Configuration.GetConnectionString("SQL");
 builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(connectionString));
 
+
+
 // Auth
+builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<AuthenticationStateProvider, CoreAuthenticationStateProvider>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddAuthorizationCore();
+
 
 #region ScopedServices
 builder.Services.AddScoped<PlayerService>();

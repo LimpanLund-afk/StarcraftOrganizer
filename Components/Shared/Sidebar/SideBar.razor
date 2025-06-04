@@ -1,4 +1,5 @@
-﻿@using StarcraftOrganizer.Data.Entities
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using StarcraftOrganizer.Data.Entities
 @inject NavigationManager NavigationManager;
 
 
@@ -33,12 +34,24 @@ class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded
 
 
         <div class="mt-auto border-t border-white b-1 pt-4">
-            <div class="text-sm text-white/70 mb-2">
-                Inloggad som <strong>@SignedInPlayer.UserName</strong>
-            </div>
-            <button @onclick="LogOut" class="w-full text-left p-2 rounded text-red-400 hover:text-red-300 hover:bg-white/10 transition-colors">
-                Logga ut
-            </button>
+            <AuthorizeView>
+                <Authorized>
+                    <div class="text-sm text-white/70 mb-2">
+                        Inloggad som <strong>@SignedInPlayer.UserName</strong>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="text-sm text-white/70 mb-2">
+                        Du är inte inloggad. <a href="/login" class="underline">Logga in här</a>.
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+            @if(SignedInPlayer != null)
+            {
+                <button @onclick="LogOut" class="w-full text-left p-2 rounded text-red-400 hover:text-red-300 hover:bg-white/10 transition-colors">
+                    Logga ut
+                </button>
+            }         
         </div>
     </nav>
 </div>
