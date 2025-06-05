@@ -9,14 +9,8 @@
 @inherits LayoutComponentBase
 
 <div class="flex h-screen bg-gradient-to-br from-[#0a0a23] via-[#1f1f3c] to-black text-white">
-    <AuthorizeView>
-        <Authorized>
-            <SideBar SignedInPlayer="SignedInPlayer" OnLogout="Logout" />
-        </Authorized>
-        <NotAuthorized>
-            <SideBar SignedInPlayer="SignedInPlayer" OnLogout="Logout" />
-        </NotAuthorized>
-    </AuthorizeView>
+
+    <SideBar SignedInPlayer="SignedInPlayer" OnLogout="Logout" />
 
     <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-2">
         @Body
@@ -25,29 +19,36 @@
 
 @code {
     private Player? SignedInPlayer;
-
-    protected override async Task OnInitializedAsync()
+    private bool _initialized;
+   
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        if (firstRender)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
 
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            SignedInPlayer = new Player
+            if (user.Identity?.IsAuthenticated == true)
             {
-                UserName = user.Identity.Name ?? "Okänd"
-               
-            };
-        }
-        else
-        {
-            SignedInPlayer = null;
+                SignedInPlayer = new Player
+                    {
+                        UserName = user.Identity?.Name ?? "Okänd"
+                    };
+            }
+            else
+            {
+                SignedInPlayer = null;
+            }
+
+            _initialized = true;
+            StateHasChanged(); // Trigga omrendering
         }
     }
 
     private async Task Logout()
     {
-        await AuthService.Logout();  // Din egen logout-metod som t ex nollställer UserSession i localStorage
+        await AuthService.Logout();
+        SignedInPlayer = null;
         NavigationManager.NavigateTo("/");
     }
 }

@@ -10,7 +10,7 @@ namespace StarcraftOrganizer.Infra
     {
         private readonly ProtectedLocalStorage _localStorage;
         private readonly IDbContextFactory<DataContext> _dbContextFactory;
-        private readonly ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+        private readonly ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
         public CoreAuthenticationStateProvider(ProtectedLocalStorage localStorage, IDbContextFactory<DataContext> dbContextFactory)
         {
