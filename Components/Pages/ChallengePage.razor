@@ -1,15 +1,33 @@
-﻿@using Microsoft.AspNetCore.Authorization
+﻿ @page "/Challenges"
+
+@using Microsoft.AspNetCore.Authorization
+@inject ChallengeService _challengeService
 
 
 
 <Page Title="Utmaningar">
     <ChildContent>
+        @if(AllChallenges != null)
+        {
+            @foreach (var challenge in AllChallenges)
+            {
+                <ChallengeCard Challenge="challenge" />
+            }
+        }
+        else
+        {
+            <div>laddar...</div>
+        }
 
     </ChildContent>
-
-    
 </Page>
 
 @code {
+    public List<Challenge> AllChallenges { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        AllChallenges = await _challengeService.GetAllChallengesAsync();
+
+    }
 }

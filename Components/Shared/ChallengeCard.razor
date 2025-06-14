@@ -1,5 +1,57 @@
-﻿<h3>ChallengeCard</h3>
+﻿<div class="bg-gradient-to-r from-hsla(205, 88%, 45%, 1) to-hsla(259, 35%, 21%, 1) rounded-lg shadow-md p-4 m-4 min-w-full">
+    <div class="flex items-center justify-center mb-4">
+        <div class="text-xl font-semibold text-white mr-2">@Challenge.Player1.UserName</div> 
+        <div class="text-sm text-gray-400 m-12">Vs</div>
+        <div class="text-xl font-semibold text-white mr-2">@Challenge.Player2.UserName</div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-300">
+        <div>Format</div>
+        <div>Status</div>
+        <div>Skapad</div>
+
+        <div class="text-white">@Challenge?.SeriesFormat</div>
+        <div class="text-white">@FormatStatus(Challenge?.Status)</div>
+        <div class="text-white">@Challenge?.CreationDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+    </div>
+    @if (Challenge?.Player1VetoMap is not null)
+    {
+        <div>Veto (P1)</div>
+        <div class="text-white">@Challenge.Player1VetoMap.Name</div>
+    }
+
+    @if (Challenge?.Player2VetoMap is not null)
+    {
+        <div>Veto (P2)</div>
+        <div class="text-white">@Challenge.Player2VetoMap.Name</div>
+    }
+    <div class="flex items-center justify-center mb-4 font-bold">
+        <div>Matcher spelade</div>
+        <div class="text-white m-12">@Challenge?.Matches.Count()</div>
+    </div>
+
+    @foreach(var map in Challenge.ChallengeMaps)
+    {
+        <div>@map.Map.Name</div> 
+
+    }
+</div>
 
 @code {
+    [Parameter]
+    public Challenge? Challenge { get; set; }
 
+
+
+    private string FormatStatus(ChallengeStatus? status)
+    {
+        return status switch
+        {
+            ChallengeStatus.PendingVeto => "Väntar på veto",
+            ChallengeStatus.ReadyToPlay => "Redo att spela",
+            ChallengeStatus.InProgress => "Pågår",
+            ChallengeStatus.Completed => "Avslutad",
+            ChallengeStatus.Cancelled => "Avbruten",
+            _ => "Okänd"
+        };
+    }
 }
