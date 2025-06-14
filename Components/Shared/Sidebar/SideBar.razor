@@ -4,12 +4,20 @@
 
 
 <button @onclick="ToggleSidebar"
-class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded-md shadow-lg backdrop-blur-sm">
-    <div class="hamburger @(isSidebarOpen ? "open" : "")" aria-label="Växla meny" aria-expanded="@isSidebarOpen.ToString().ToLower()">
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
+        class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded-md shadow-lg backdrop-blur-sm hover:cursor-pointer">
+
+    @if (!isSidebarOpen)
+    {
+        <svg class="w-6 h-6 cursor-pointer" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    }
+    else
+    {
+        <svg class="w-6 h-6 cursor-pointer" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    }
 </button>
 
 
@@ -56,35 +64,46 @@ class="fixed top-4 left-4 p-2 z-[60] md:hidden text-white bg-gray-800/60 rounded
 
 <style>
     .hamburger {
-    position: relative; 
-    width: 24px;
-    height: 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+        position: relative;
+        width: 24px;
+        height: 24px;
     }
 
-    .hamburger span {
-    display: block;
-    height: 3px; 
-    width: 100%;
-    background-color: white; 
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    border-radius: 1px; 
-    }
+        .hamburger span {
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background-color: white;
+            left: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border-radius: 2px;
+        }
 
-    .hamburger.open span:nth-child(1) {
-    transform: translateY(7.5px) rotate(45deg);
-    }
+            .hamburger span:nth-child(1) {
+                top: 0;
+            }
 
-    .hamburger.open span:nth-child(2) {
-    opacity: 0;
-    }
+            .hamburger span:nth-child(2) {
+                top: 10px;
+            }
 
-    .hamburger.open span:nth-child(3) {
-    transform: translateY(-7.5px) rotate(-45deg);
-    }
+            .hamburger span:nth-child(3) {
+                top: 20px;
+            }
+
+        .hamburger.open span:nth-child(1) {
+            transform: rotate(45deg);
+            top: 10px;
+        }
+
+        .hamburger.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.open span:nth-child(3) {
+            transform: rotate(-45deg);
+            top: 10px;
+        }
 </style>
 
 @code {
