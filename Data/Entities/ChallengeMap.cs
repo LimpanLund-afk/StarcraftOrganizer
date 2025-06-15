@@ -1,6 +1,6 @@
 ﻿namespace StarcraftOrganizer.Data.Entities
 {
-    public class ChallengeMaps
+    public class ChallengeMap
     {
         public int ChallengeId { get; set; }
         public Challenge Challenge { get; set; }

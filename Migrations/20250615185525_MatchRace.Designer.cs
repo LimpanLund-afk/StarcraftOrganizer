@@ -12,8 +12,8 @@ using StarcraftOrganizer.Data.DataContext;
 namespace StarcraftOrganizer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250604195544_ANuStart")]
-    partial class ANuStart
+    [Migration("20250615185525_MatchRace")]
+    partial class MatchRace
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,10 +122,16 @@ namespace StarcraftOrganizer.Migrations
                     b.Property<int>("Player1Id")
                         .HasColumnType("int");
 
+                    b.Property<int>("Player1Race")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Player1Won")
                         .HasColumnType("bit");
 
                     b.Property<int>("Player2Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Player2Race")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

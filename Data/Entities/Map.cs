@@ -7,6 +7,6 @@
 
         public string? ImageUrl { get; set; }
 
-        public virtual ICollection<ChallengeMaps> ChallengeMaps { get; set; } = new List<ChallengeMaps>();
+        public virtual ICollection<ChallengeMap> ChallengeMaps { get; set; } = new List<ChallengeMap>();
     }
 }

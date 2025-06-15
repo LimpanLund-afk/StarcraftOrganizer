@@ -64,7 +64,7 @@ namespace StarcraftOrganizer.Migrations
                     b.ToTable("Challenges");
                 });
 
-            modelBuilder.Entity("StarcraftOrganizer.Data.Entities.ChallengeMaps", b =>
+            modelBuilder.Entity("StarcraftOrganizer.Data.Entities.ChallengeMap", b =>
                 {
                     b.Property<int>("ChallengeId")
                         .HasColumnType("int");
@@ -76,7 +76,7 @@ namespace StarcraftOrganizer.Migrations
 
                     b.HasIndex("MapId");
 
-                    b.ToTable("ChallengeMaps");
+                    b.ToTable("ChallengeMap");
                 });
 
             modelBuilder.Entity("StarcraftOrganizer.Data.Entities.Map", b =>
@@ -119,10 +119,16 @@ namespace StarcraftOrganizer.Migrations
                     b.Property<int>("Player1Id")
                         .HasColumnType("int");
 
+                    b.Property<int>("Player1Race")
+                        .HasColumnType("int");
+
                     b.Property<bool>("Player1Won")
                         .HasColumnType("bit");
 
                     b.Property<int>("Player2Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Player2Race")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -196,16 +202,16 @@ namespace StarcraftOrganizer.Migrations
                     b.Navigation("Player2VetoMap");
                 });
 
-            modelBuilder.Entity("StarcraftOrganizer.Data.Entities.ChallengeMaps", b =>
+            modelBuilder.Entity("StarcraftOrganizer.Data.Entities.ChallengeMap", b =>
                 {
                     b.HasOne("StarcraftOrganizer.Data.Entities.Challenge", "Challenge")
-                        .WithMany("ChallengeMaps")
+                        .WithMany("ChallengeMap")
                         .HasForeignKey("ChallengeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("StarcraftOrganizer.Data.Entities.Map", "Map")
-                        .WithMany("ChallengeMaps")
+                        .WithMany("ChallengeMap")
                         .HasForeignKey("MapId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -252,14 +258,14 @@ namespace StarcraftOrganizer.Migrations
 
             modelBuilder.Entity("StarcraftOrganizer.Data.Entities.Challenge", b =>
                 {
-                    b.Navigation("ChallengeMaps");
+                    b.Navigation("ChallengeMap");
 
                     b.Navigation("Matches");
                 });
 
             modelBuilder.Entity("StarcraftOrganizer.Data.Entities.Map", b =>
                 {
-                    b.Navigation("ChallengeMaps");
+                    b.Navigation("ChallengeMap");
                 });
 
             modelBuilder.Entity("StarcraftOrganizer.Data.Entities.Player", b =>

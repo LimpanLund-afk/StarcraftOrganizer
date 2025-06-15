@@ -83,7 +83,7 @@ namespace StarcraftOrganizer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChallengeMaps",
+                name: "ChallengeMap",
                 columns: table => new
                 {
                     ChallengeId = table.Column<int>(type: "int", nullable: false),
@@ -147,7 +147,7 @@ namespace StarcraftOrganizer.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChallengeMaps_MapId",
-                table: "ChallengeMaps",
+                table: "ChallengeMap",
                 column: "MapId");
 
             migrationBuilder.CreateIndex(
@@ -195,7 +195,7 @@ namespace StarcraftOrganizer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChallengeMaps");
+                name: "ChallengeMap");
 
             migrationBuilder.DropTable(
                 name: "Matches");

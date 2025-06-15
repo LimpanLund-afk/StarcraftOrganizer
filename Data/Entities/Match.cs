@@ -14,6 +14,17 @@ namespace StarcraftOrganizer.Data.Entities
         public Map Map { get; set; }
         public bool Player1Won { get; set; }
 
+        public ChosenRace Player1Race { get; set; } // NYTT: Vald ras för matchen
+        public ChosenRace Player2Race { get; set; }
+
+        public enum ChosenRace
+        {
+            Zerg,
+            Protoss,
+            Terran,
+            Random // NYTT: Lägger till Random som ett alternativ
+        }
+
         // NYTT: Länk till vilken Challenge denna match tillhör
         public int ChallengeId { get; set; }
         public virtual Challenge Challenge { get; set; }

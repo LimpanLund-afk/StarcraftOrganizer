@@ -198,7 +198,7 @@
 
             await ChallengeService.AddAsync(challenge);
 
-            var challengeMaps = selectedMaps.Select(map => new ChallengeMaps
+            var challengeMaps = selectedMaps.Select(map => new ChallengeMap
                 {
                     ChallengeId = challenge.Id,
                     MapId = map.Id

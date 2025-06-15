@@ -35,5 +35,12 @@ namespace StarcraftOrganizer.Services
                 .Where(m => m.Player1Id == playerId || m.Player2Id == playerId)
                 .ToListAsync();
         }
+
+        public async Task AddMatch(Match match)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+            context.Matches.Add(match);
+            await context.SaveChangesAsync();
+        }
     }
 }

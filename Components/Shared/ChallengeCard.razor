@@ -1,10 +1,15 @@
-﻿<div class="bg-gradient-to-r from-hsla(205, 88%, 45%, 1) to-hsla(259, 35%, 21%, 1) rounded-lg shadow-md p-4 m-4 min-w-full">
+﻿@using StarcraftOrganizer.Data.Entities;
+
+@inject ChallengeService _challengeService
+@inject MatchService _matchService
+
+<div class="border border-blue-500/40 bg-[#1a1f2b] shadow-lg shadow-blue-500/10 p-4 rounded-lg shadow-md p-4 m-4 min-w-full">
     <div class="flex items-center justify-center mb-4">
         <div class="text-xl font-semibold text-white mr-2">@Challenge.Player1.UserName</div> 
         <div class="text-sm text-gray-400 m-12">Vs</div>
         <div class="text-xl font-semibold text-white mr-2">@Challenge.Player2.UserName</div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-300">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-300 mb-6 items-center text-center">
         <div>Format</div>
         <div>Status</div>
         <div>Skapad</div>
@@ -13,26 +18,73 @@
         <div class="text-white">@FormatStatus(Challenge?.Status)</div>
         <div class="text-white">@Challenge?.CreationDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
     </div>
-    @if (Challenge?.Player1VetoMap is not null)
-    {
-        <div>Veto (P1)</div>
-        <div class="text-white">@Challenge.Player1VetoMap.Name</div>
-    }
+    <div class="flex items-center justify-evenly mb-4">
+        @if (Challenge?.Player1VetoMap is not null)
+        {
+            <div class="">
+                <div>Veto (P1)</div>
+                <div class="text-white">@Challenge.Player1VetoMap.Name</div>
+            </div>
 
-    @if (Challenge?.Player2VetoMap is not null)
-    {
-        <div>Veto (P2)</div>
-        <div class="text-white">@Challenge.Player2VetoMap.Name</div>
-    }
+        }
+
+        @if (Challenge?.Player2VetoMap is not null)
+        {
+            <div class="">
+                <div>Veto (P2)</div>
+                <div class="text-white">@Challenge.Player2VetoMap.Name</div>
+            </div>
+
+        }
+    </div>
+
     <div class="flex items-center justify-center mb-4 font-bold">
         <div>Matcher spelade</div>
         <div class="text-white m-12">@Challenge?.Matches.Count()</div>
     </div>
 
-    @foreach(var map in Challenge.ChallengeMaps)
+    @foreach (var map in Challenge.ChallengeMaps)
     {
-        <div>@map.Map.Name</div> 
+        @if (StartedMapIds.Contains(map.MapId))
+        {
+            <div class="border border-blue-400/30 bg-[#1a1f2b] rounded-lg shadow-lg shadow-blue-500/10 p-4 mb-6">
+                <h4 class="font-semibold mb-2">Starta match för @map.Map.Name</h4>
 
+                <div class="flex justify-between items-center gap-4">
+                    <!-- Player 1 race -->
+                    <div class="flex items-center gap-2">
+                        <span>@Challenge.Player1.UserName</span>
+                        <select class="form-select" @bind="player1Races[map.MapId]">
+                            @foreach (var race in Enum.GetValues(typeof(Match.ChosenRace)))
+                            {
+                                <option value="@race">@race</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div>vs</div>
+
+                    <!-- Player 2 race -->
+                    <div class="flex items-center gap-2">
+                        <select class="form-select" @bind="player2Races[map.MapId]">
+                            @foreach (var race in Enum.GetValues(typeof(Match.ChosenRace)))
+                            {
+                                <option value="@race">@race</option>
+                            }
+                        </select>
+                        <span>@Challenge.Player2.UserName</span>
+                    </div>
+                </div>
+
+
+            </div>
+        }
+        else
+        {
+            <button class="mt-4 btn btn-primary cursor-pointer " @onclick="() => CreateMatch(map)">
+                Skapa match
+            </button>
+        }
     }
 </div>
 
@@ -40,7 +92,25 @@
     [Parameter]
     public Challenge? Challenge { get; set; }
 
+    private Match.ChosenRace player1RaceSelection = Match.ChosenRace.Terran;
+    private Match.ChosenRace player2RaceSelection = Match.ChosenRace.Zerg;
 
+    private Dictionary<int, Match.ChosenRace> player1Races = new();
+    private Dictionary<int, Match.ChosenRace> player2Races = new();
+
+    List<int> StartedMapIds = new();
+
+    protected override void OnInitialized()
+    {
+        foreach (var map in Challenge.ChallengeMaps)
+        {
+            if (!player1Races.ContainsKey(map.MapId))
+                player1Races[map.MapId] = Match.ChosenRace.Random; // eller annan default
+
+            if (!player2Races.ContainsKey(map.MapId))
+                player2Races[map.MapId] = Match.ChosenRace.Random;
+        }
+    }
 
     private string FormatStatus(ChallengeStatus? status)
     {
@@ -53,5 +123,45 @@
             ChallengeStatus.Cancelled => "Avbruten",
             _ => "Okänd"
         };
+    }
+
+    private string GetRaceIcon(Match.ChosenRace race)
+    {
+        return race switch
+        {
+            Match.ChosenRace.Zerg => "/images/Zerg_Icon.jpg",
+            Match.ChosenRace.Protoss => "/images/Protoss_Icon.jpg",
+            Match.ChosenRace.Terran => "/images/Terran_Icon.jpg",
+            Match.ChosenRace.Random => "/images/random.png",
+            _ => "/icons/unknown.png"
+        };
+    }
+
+    private void SetWinner(Match match, bool player1Won)
+    {
+        match.Player1Won = player1Won;
+
+        // Om du vill spara direkt till databasen:
+        //_context.Update(match);
+        //await _context.SaveChangesAsync();
+    }
+
+    private async Task CreateMatch(ChallengeMap map)
+    {
+        var match = new Match
+        {
+            ChallengeId = Challenge.Id,
+            MapId = map.MapId,
+            Player1Id = Challenge.Player1Id,
+            Player2Id = Challenge.Player2Id,
+            Player1Race = player1RaceSelection,
+            Player2Race = player2RaceSelection,
+            Date = DateTime.Now
+        };
+
+       await _matchService.AddMatch(match);
+
+        Challenge = await _challengeService.GetByIdAsync(Challenge.Id);
+        StartedMapIds.Add(map.MapId);
     }
 }

@@ -6,7 +6,7 @@ using StarcraftOrganizer.Components;
 using StarcraftOrganizer.Data.DataContext;
 using StarcraftOrganizer.Infra;
 using StarcraftOrganizer.Services;
-using Microsoft.AspNetCore.Authentication;
+
 
 var builder = WebApplication.CreateBuilder(args);
 

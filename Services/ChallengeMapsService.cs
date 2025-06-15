@@ -14,7 +14,7 @@ namespace StarcraftOrganizer.Services
         }
 
 
-        public async Task AddAsync(IEnumerable<ChallengeMaps> challengeMaps)
+        public async Task AddAsync(IEnumerable<ChallengeMap> challengeMaps)
         {
             if (challengeMaps == null || !challengeMaps.Any())
                 return;

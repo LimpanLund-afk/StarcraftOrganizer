@@ -14,7 +14,7 @@ namespace StarcraftOrganizer.Data.DataContext
         public DbSet<Player> Players { get; set; } = null!;
         public DbSet<Match> Matches { get; set; } = null!;
         public DbSet<Challenge> Challenges { get; set; } = null!;
-        public DbSet<ChallengeMaps> ChallengeMaps { get; set; } = null!;
+        public DbSet<ChallengeMap> ChallengeMaps { get; set; } = null!;
 
 
 
@@ -56,15 +56,15 @@ namespace StarcraftOrganizer.Data.DataContext
                 .HasForeignKey(m => m.ChallengeId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<ChallengeMaps>()
+            modelBuilder.Entity<ChallengeMap>()
                 .HasKey(cm => new { cm.ChallengeId, cm.MapId });
 
-            modelBuilder.Entity<ChallengeMaps>()
+            modelBuilder.Entity<ChallengeMap>()
                 .HasOne(cm => cm.Challenge)
                 .WithMany(c => c.ChallengeMaps)
                 .HasForeignKey(cm => cm.ChallengeId);
 
-            modelBuilder.Entity<ChallengeMaps>()
+            modelBuilder.Entity<ChallengeMap>()
                 .HasOne(cm => cm.Map)
                 .WithMany(m => m.ChallengeMaps)
                 .HasForeignKey(cm => cm.MapId);

@@ -28,7 +28,7 @@ namespace StarcraftOrganizer.Data.Entities
 
         public virtual ICollection<Match> Matches { get; set; } = new List<Match>();
 
-        public virtual ICollection<ChallengeMaps> ChallengeMaps { get; set; } = new List<ChallengeMaps>();
+        public virtual ICollection<ChallengeMap> ChallengeMaps { get; set; } = new List<ChallengeMap>();
     }
 
 
