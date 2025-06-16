@@ -12,7 +12,7 @@ namespace StarcraftOrganizer.Data.Entities
         public Player Player2 { get; set; }
         public int MapId { get; set; }
         public Map Map { get; set; }
-        public bool Player1Won { get; set; }
+        public bool? Player1Won { get; set; }
 
         public ChosenRace Player1Race { get; set; } // NYTT: Vald ras för matchen
         public ChosenRace Player2Race { get; set; }
@@ -30,6 +30,6 @@ namespace StarcraftOrganizer.Data.Entities
         public virtual Challenge Challenge { get; set; }
 
         [NotMapped]
-        public Player Winner => Player1Won ? Player1 : Player2;
+        public Player Winner => Player1Won.Value ? Player1 : Player2;
     }
 }

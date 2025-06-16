@@ -42,5 +42,12 @@ namespace StarcraftOrganizer.Services
             context.Matches.Add(match);
             await context.SaveChangesAsync();
         }
+
+        public async Task UpdateMatch(Match match)
+        {
+            using var context = await _contextFactory.CreateDbContextAsync();
+            context.Matches.Update(match);
+            await context.SaveChangesAsync();
+        }
     }
 }
