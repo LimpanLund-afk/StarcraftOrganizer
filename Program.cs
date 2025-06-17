@@ -10,6 +10,8 @@ using StarcraftOrganizer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// för att exponera lokalt
+//builder.WebHost.UseUrls("http://192.168.56.68:5000", "https://192.168.56.68:5001");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
