@@ -1,10 +1,11 @@
 ﻿@using StarcraftOrganizer.Data.Entities
 @inject MatchService MatchService;
+@inject NavigationManager Navigation
 
 
-<div class="border border-blue-400/30 bg-[#1a1f2b] rounded-lg shadow-lg shadow-blue-500/10 p-4 mb-6 p-4 m-4 min-w-full">
-    <div class="flex items-center mb-4">
-        <div class="text-xl font-semibold text-white mr-2">@Player.UserName</div>
+<div class="m-4 mb-6 min-w-full rounded-lg border border-blue-400/30 bg-[#1a1f2b] p-4 p-4 shadow-lg shadow-blue-500/10">
+    <div class="mb-4 flex items-center">
+        <div class="mr-2 text-xl font-semibold text-white">@Player.UserName</div>
         <div class="text-sm text-gray-400">@Player.Race</div>
     </div>
     <div class="grid grid-cols-3 gap-2 text-sm text-gray-300">
@@ -14,7 +15,20 @@
         <div class="text-white">@Wins</div>
         <div class="text-white">@Losses</div>
         <div class="text-white">@WinPercentage%</div>
+      
+
     </div>
+
+
+    @if (Player is not null)
+    {
+        <NavLink class="mt-4 inline-block rounded bg-blue-600 px-3 py-1 font-semibold text-white hover:bg-blue-700"
+                 href="@($"/player/{Player.Id}")">
+            Visa profil
+        </NavLink>
+    }
+
+
 </div>
 
 @code {
