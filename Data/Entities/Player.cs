@@ -14,6 +14,11 @@ namespace StarcraftOrganizer.Data.Entities
 
         public FavouredRace Race { get; set; }
 
+        public string? PlayerBio { get; set; }
+
+        public string? FavouredStrat { get; set; }
+
+
 
         public virtual ICollection<Challenge>? ChallengesAsPlayer1 { get; set; } = new List<Challenge>();
         public virtual ICollection<Challenge>? ChallengesAsPlayer2 { get; set; } = new List<Challenge>();
