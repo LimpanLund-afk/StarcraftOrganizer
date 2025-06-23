@@ -1,13 +1,121 @@
-﻿@using Microsoft.AspNetCore.Authorization
+﻿@page "/player/{PlayerId:int}"
+@using Microsoft.AspNetCore.Authorization
+@inject PlayerService _PlayerService
+@inject MatchService _MatchService
 
 
 <Page>
     <ChildContent>
-        <h1>Player Profile</h1>
+        <!-- Flex-rad som delar in vänster & höger -->
+        <div class="container mx-auto mt-10 flex flex-col-reverse gap-8 text-white lg:flex-row">
+
+
+
+            <!-- Vänsterkolumn: Namn + info -->
+            <div class="flex-1 space-y-6">
+                <!-- Namn och ras -->
+                <div>
+                    <h2 class="text-2xl font-bold">@_player?.UserName</h2>
+                    @if (_player != null)
+                    {
+                        <p class="text-sm text-gray-400">
+                            @GetRaceTitle(_player.Race)
+                        </p>
+                    }
+                    else
+                    {
+                        <h1>Please select your favourite race</h1>
+                    }
+
+                       
+                        
+                </div>
+         
+
+                <!-- Spelarinfo -->
+                <div class="space-y-2 border-t border-gray-700 pt-4">
+                    <div><strong>Rank:</strong> @GetRank()</div>
+
+
+                    <div><strong>Winrate:</strong> @Winrate%</div>
+                    <div><strong>Games Played:</strong> @GamesPlayed</div>
+
+                </div>
+            </div>
+
+            <!-- Högerkolumn: Bild -->
+            <div class="flex-shrink-0">
+                <div class="imgBx relative h-[250px] w-[250px] rounded-xl border border-gray-700 bg-black">
+
+                    @if (_player is not null)
+                    {
+                        <img src="@GetRaceImage(_player.Race)" alt="Player Portrait" />
+                    }
+                </div>
+            </div>
+        </div>
+
 
     </ChildContent>
 </Page>
 
 @code {
+    [Parameter] public int PlayerId { get; set; }
+    public Player? _player;
+
+    private List<Match> _recentMatches = new();
+
+    private int GamesPlayed => _recentMatches.Count;
+
+    private int GamesWon => _recentMatches.Count(m =>
+        (m.Player1Id == PlayerId && m.Player1Won == true) ||
+        (m.Player2Id == PlayerId && m.Player1Won == false)
+    );
+
+    private int Winrate => GamesPlayed > 0 ? (int)Math.Round((double)GamesWon / GamesPlayed * 100) : 0;
+
+    private string GetRaceImage(FavouredRace race)
+    {
+        return race switch
+        {
+            FavouredRace.Zerg => "/Images/Zerg_Icon.jpg",
+            FavouredRace.Protoss => "/Images/Protoss_Icon.jpg",
+            FavouredRace.Terran => "/Images/Terran_Icon.jpg",
+            _ => "/Images/Unknown_Icon.jpg"
+        };
+    }
+
+    private string GetRaceTitle(FavouredRace? race)
+    {
+        return race switch
+        {
+            FavouredRace.Zerg => "Zerg Commander",
+            FavouredRace.Protoss => "Protoss Executor",
+            FavouredRace.Terran => "Terran General",
+            _ => "Unknown Race"
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _player = await _PlayerService.GetPlayerByIdAsync(PlayerId);
+        _recentMatches = await _MatchService.GetMatchesByPlayerIdAsync(PlayerId);
+    }
+
+
+    private string GetRank()
+    {
+        return Winrate switch
+        {
+            >= 90 => "Grandmaster",
+            >= 80 => "Platinum 3",
+            >= 60 => "Gold 1",
+            >= 40 => "Silver 2",
+            >= 20 => "Bronze 4",
+            _ => "Wood 5"
+        };
+    }
 
 }
+
+
