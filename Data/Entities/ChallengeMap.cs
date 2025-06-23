@@ -7,5 +7,7 @@
 
         public int MapId { get; set; }
         public Map Map { get; set; }
+
+        public bool IsPlayed { get; set; }
     }
 }

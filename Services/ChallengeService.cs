@@ -55,6 +55,20 @@ namespace StarcraftOrganizer.Services
             await context.SaveChangesAsync();
         }
 
+
+        public async Task DeleteChallengeMapAsync(ChallengeMap challengeMap)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var entity = await context.ChallengeMaps
+                .FindAsync(challengeMap.ChallengeId, challengeMap.MapId);
+
+            if (entity != null)
+            {
+                context.ChallengeMaps.Remove(entity);
+                await context.SaveChangesAsync();
+            }
+        }
         public async Task DeleteAsync(int id)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -108,6 +122,21 @@ namespace StarcraftOrganizer.Services
             var challenge = await context.Challenges.FindAsync(challengeId);
             return challenge?.Player1VetoMapId != null && challenge?.Player2VetoMapId != null;
         }
+
+        public async Task SetMapAsPlayedAsync(int challengeId, int mapId)
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var challengeMap = await context.ChallengeMaps
+                .FirstOrDefaultAsync(cm => cm.ChallengeId == challengeId && cm.MapId == mapId);
+
+            if (challengeMap != null)
+            {
+                challengeMap.IsPlayed = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
     }
 
 

@@ -17,8 +17,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var connectionString = builder.Configuration.GetConnectionString("SQL");
-builder.Services.AddDbContextFactory<DataContext>(x => x.UseSqlServer(connectionString));
+var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("PostgreSQL")
+    ?? builder.Configuration.GetConnectionString("SQL"); // Fallback
+
+builder.Services.AddDbContextFactory<DataContext>(x => x.UseNpgsql(connectionString)); // Ändrat från UseSqlServer
+
 
 
 

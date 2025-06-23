@@ -3,23 +3,34 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace StarcraftOrganizer.Data.DataContext
 {
-   
+
 
     public class DataContextFactory : IDesignTimeDbContextFactory<DataContext>
     {
         public DataContext CreateDbContext(string[] args)
         {
-            var config = new ConfigurationBuilder()
+            var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.Development.json", optional: true)
-                .AddUserSecrets<Program>() // om du använder secrets
-                .Build();
+                .AddJsonFile("appsettings.Development.json", optional: true);
 
-            var connectionString = config.GetConnectionString("SQL");
+            // Lägg till User Secrets bara om de finns
+            //try
+            //{
+            //    //configBuilder.AddUserSecrets<Program>();
+            //}
+            //catch
+            //{
+            //    // Ignorera om User Secrets inte finns/är tomma
+            //}
+
+            var config = configBuilder.Build();
+
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
+                ?? config.GetConnectionString("PostgreSQL")
+                ?? config.GetConnectionString("SQL");
 
             var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-            optionsBuilder.UseSqlServer(connectionString);
-
+            optionsBuilder.UseNpgsql(connectionString);
             return new DataContext(optionsBuilder.Options);
         }
     }

@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace StarcraftOrganizer.Migrations
 {
     /// <inheritdoc />
-    public partial class ANuStart : Migration
+    public partial class InitialPostgreSQL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,10 +16,10 @@ namespace StarcraftOrganizer.Migrations
                 name: "Maps",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ImageUrl = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -29,12 +30,12 @@ namespace StarcraftOrganizer.Migrations
                 name: "Players",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Salt = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Race = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    Salt = table.Column<string>(type: "text", nullable: true),
+                    UserName = table.Column<string>(type: "text", nullable: false),
+                    Race = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,15 +46,15 @@ namespace StarcraftOrganizer.Migrations
                 name: "Challenges",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Player1Id = table.Column<int>(type: "int", nullable: false),
-                    Player2Id = table.Column<int>(type: "int", nullable: false),
-                    SeriesFormat = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Player1VetoMapId = table.Column<int>(type: "int", nullable: true),
-                    Player2VetoMapId = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Player1Id = table.Column<int>(type: "integer", nullable: false),
+                    Player2Id = table.Column<int>(type: "integer", nullable: false),
+                    SeriesFormat = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Player1VetoMapId = table.Column<int>(type: "integer", nullable: true),
+                    Player2VetoMapId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -83,11 +84,11 @@ namespace StarcraftOrganizer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChallengeMap",
+                name: "ChallengeMaps",
                 columns: table => new
                 {
-                    ChallengeId = table.Column<int>(type: "int", nullable: false),
-                    MapId = table.Column<int>(type: "int", nullable: false)
+                    ChallengeId = table.Column<int>(type: "integer", nullable: false),
+                    MapId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,14 +111,16 @@ namespace StarcraftOrganizer.Migrations
                 name: "Matches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Player1Id = table.Column<int>(type: "int", nullable: false),
-                    Player2Id = table.Column<int>(type: "int", nullable: false),
-                    MapId = table.Column<int>(type: "int", nullable: false),
-                    Player1Won = table.Column<bool>(type: "bit", nullable: false),
-                    ChallengeId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Player1Id = table.Column<int>(type: "integer", nullable: false),
+                    Player2Id = table.Column<int>(type: "integer", nullable: false),
+                    MapId = table.Column<int>(type: "integer", nullable: false),
+                    Player1Won = table.Column<bool>(type: "boolean", nullable: true),
+                    Player1Race = table.Column<int>(type: "integer", nullable: false),
+                    Player2Race = table.Column<int>(type: "integer", nullable: false),
+                    ChallengeId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -147,7 +150,7 @@ namespace StarcraftOrganizer.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChallengeMaps_MapId",
-                table: "ChallengeMap",
+                table: "ChallengeMaps",
                 column: "MapId");
 
             migrationBuilder.CreateIndex(
@@ -195,7 +198,7 @@ namespace StarcraftOrganizer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChallengeMap");
+                name: "ChallengeMaps");
 
             migrationBuilder.DropTable(
                 name: "Matches");

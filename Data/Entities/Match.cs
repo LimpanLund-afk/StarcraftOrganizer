@@ -22,7 +22,7 @@ namespace StarcraftOrganizer.Data.Entities
             Zerg,
             Protoss,
             Terran,
-            Random // NYTT: Lägger till Random som ett alternativ
+            Random 
         }
 
         // NYTT: Länk till vilken Challenge denna match tillhör

@@ -5,19 +5,19 @@
 @inject MatchService _matchService
 
 <div class="border border-blue-500/40 bg-[#1a1f2b] shadow-lg shadow-blue-500/10 p-4 rounded-lg shadow-md p-4 m-4 min-w-full">
-    <div class="flex items-center justify-center mb-4">
-        <div class="text-xl font-semibold text-white mr-2">@Challenge.Player1.UserName</div> 
-        <div class="text-sm text-gray-400 m-12">Vs</div>
-        <div class="text-xl font-semibold text-white mr-2">@Challenge.Player2.UserName</div>
+    <div class="grid grid-cols-3 items-center text-center mb-4">
+        <div class="text-xl font-semibold text-white">@Challenge.Player1.UserName</div> 
+        <div class="text-sm text-center text-gray-400 m-12">Vs</div>
+        <div class="text-xl font-semibold text-white">@Challenge.Player2.UserName</div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-300 mb-6 items-center text-center">
-        <div>Format</div>
-        <div>Status</div>
-        <div>Skapad</div>
+    <div class="grid grid-cols-3 gap-2 text-sm text-gray-300 mb-6 items-center text-center">
+        <div class="font-semibold text-sm">Format</div>
+        <div class ="font-semibold text-sm">Status</div>
+        <div class="font-semibold text-sm">Skapad</div>
 
         <div class="text-white">@Challenge?.SeriesFormat</div>
         <div class="text-white">@FormatStatus(Challenge?.Status)</div>
-        <div class="text-white">@Challenge?.CreationDate.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+        <div class="text-white">@Challenge?.CreationDate.ToLocalTime().ToString("yyyy-MM-dd")</div>
     </div>
     <div class="flex items-center justify-evenly mb-4">
         @if (Challenge?.Player1VetoMap is not null)
@@ -70,15 +70,14 @@
 
                     <!-- Player 2 -->
                     <div class="flex items-center gap-2">
-                        <RaceDropdown @bind-Race="player2Races[map.MapId]" />
-                        <span class="text-white">@Challenge.Player2.UserName</span>
-
                         @if (match?.Player1Won != null)
                         {
                             <span class="@(match.Player1Won == false ? "text-green-400 font-bold text-xl" : "text-red-400 font-bold text-xl")">
                                 @(match.Player1Won == false ? "W" : "L")
                             </span>
                         }
+                        <RaceDropdown @bind-Race="player2Races[map.MapId]" />
+                        <span class="text-white">@Challenge.Player2.UserName</span>                       
                     </div>
                 </div>
 
@@ -124,14 +123,13 @@
                 </div>
             </div>
         }
-        else
+        else if (Challenge.Status != ChallengeStatus.Completed)
         {
             <div class="grid grid-cols-1 gap-y-2">
                 <button class="mt-4 btn btn-primary cursor-pointer " @onclick="() => CreateMatch(map)">
                     Starta match
                 </button>
             </div>
-
         }
     }
 </div>
@@ -157,6 +155,16 @@
         }
     }
 
+    private int GetMaxMatches(BestOfFormat format) => format switch
+    {
+        BestOfFormat.BestOf1 => 1,
+        BestOfFormat.BestOf3 => 3,
+        BestOfFormat.BestOf5 => 5,
+        BestOfFormat.BestOf7 => 7,
+        BestOfFormat.BestOf10 => 10,
+        _ => 1
+    };
+
     private int GetMatchesNeededToWin(BestOfFormat format) => format switch
     {
         BestOfFormat.BestOf1 => 1,
@@ -167,12 +175,22 @@
         _ => 1
     };
 
-    private (int p1Wins, int p2Wins) CountWins(IEnumerable<Match> matches)
+    private(int p1Wins, int p2Wins) CountWins(IEnumerable<Match> matches)
     {
-        int p1 = matches.Count(m => m.Player1Won == true);
-        int p2 = matches.Count(m => m.Player1Won == false);
-        return (p1, p2);
+        int p1Id = Challenge.Player1Id;
+        int p2Id = Challenge.Player2Id;
+
+        int p1Wins = matches.Count(m =>
+            (m.Player1Id == p1Id && m.Player1Won == true) ||
+            (m.Player2Id == p1Id && m.Player1Won == false));
+
+        int p2Wins = matches.Count(m =>
+            (m.Player1Id == p2Id && m.Player1Won == true) ||
+            (m.Player2Id == p2Id && m.Player1Won == false));
+
+        return (p1Wins, p2Wins);
     }
+
 
     private void SelectRace(int mapId, Match.ChosenRace race)
     {
@@ -208,9 +226,8 @@
     private async Task SetWinner(Match match, bool player1Won)
     {
         match.Player1Won = player1Won;
-        await _matchService.UpdateMatch(match); // Du behöver ha den metoden i din MatchService
+        await _matchService.UpdateMatch(match);
 
-        // Ladda om Challenge för att uppdatera UI
         Challenge = await _challengeService.GetByIdAsync(Challenge.Id);
     }
 
@@ -224,7 +241,7 @@
             Player2Id = Challenge.Player2Id,
             Player1Race = player1Races[map.MapId],
             Player2Race = player2Races[map.MapId],
-            Date = DateTime.Now,
+            Date = DateTime.UtcNow,
             Player1Won = null
         };
 
@@ -235,12 +252,13 @@
 
         StartedMapIds.Add(map.MapId);
 
+        await _challengeService.SetMapAsPlayedAsync(Challenge.Id, map.MapId);
 
         var (p1Wins, p2Wins) = CountWins(Challenge.Matches);
+        int maxMatches = GetMaxMatches(Challenge.SeriesFormat);
         int requiredWins = GetMatchesNeededToWin(Challenge.SeriesFormat);
 
-        if (p1Wins >= requiredWins || p2Wins >= requiredWins ||
-            Challenge.Matches.Count() >= Challenge.ChallengeMaps.Count)
+        if (p1Wins >= requiredWins || p2Wins >= requiredWins || Challenge.Matches.Count() >= maxMatches)
         {
             Challenge.Status = ChallengeStatus.Completed;
         }
@@ -250,5 +268,6 @@
         }
 
         await _challengeService.UpdateAsync(Challenge);
+        
     }
 }
