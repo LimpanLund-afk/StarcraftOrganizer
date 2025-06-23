@@ -1,4 +1,7 @@
+version: '3.8'
+
 services:
+  # PostgreSQL databas
   postgres:
     image: postgres:15
     container_name: starcraft_postgres
@@ -10,6 +13,29 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Din .NET applikation
+  starcraft-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: starcraft_app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      # Databasanslutning - anpassa efter din connection string
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=starcraftdb;Username=postgres;Password=lokaltlosenord
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
