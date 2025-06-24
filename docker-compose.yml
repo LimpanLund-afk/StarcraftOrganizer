@@ -1,40 +1,49 @@
 services:
-  # PostgreSQL databas
   postgres:
     image: postgres:15
     container_name: starcraft_postgres
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: starcraftdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: lokaltlosenord
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - app-network
 
-  # Din .NET applikation
   starcraft-app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: starcraft_app
+    env_file:
+      - .env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      # Databasanslutning - anpassa efter din connection string
-      - ConnectionStrings__PostgreSQL=Host=postgres;Database=starcraftdb;Username=postgres;Password=lokaltlosenord
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

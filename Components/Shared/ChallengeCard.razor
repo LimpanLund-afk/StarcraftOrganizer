@@ -47,7 +47,7 @@
     {
         var match = Challenge.Matches.FirstOrDefault(m => m.MapId == map.MapId);
 
-        @if (StartedMapIds.Contains(map.MapId))
+        @if (!map.IsPlayed)
         {
             <div class="border border-blue-400/30 bg-[#1a1f2b] rounded-lg shadow-lg shadow-blue-500/10 p-4 mb-6">
                 <h4 class="font-semibold mb-2">Match för @map.Map.Name</h4>
@@ -144,7 +144,7 @@
 
 
     private bool isRaceDropdownOpen = false;
-    List<int> StartedMapIds = new();
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -229,6 +229,21 @@
         await _matchService.UpdateMatch(match);
 
         Challenge = await _challengeService.GetByIdAsync(Challenge.Id);
+
+        var (p1Wins, p2Wins) = CountWins(Challenge.Matches);
+        int maxMatches = GetMaxMatches(Challenge.SeriesFormat);
+        int requiredWins = GetMatchesNeededToWin(Challenge.SeriesFormat);
+
+        if (p1Wins >= requiredWins || p2Wins >= requiredWins || Challenge.Matches.Count() >= maxMatches)
+        {
+            Challenge.Status = ChallengeStatus.Completed;
+        }
+        else
+        {
+            Challenge.Status = ChallengeStatus.InProgress;
+        }
+
+        await _challengeService.UpdateAsync(Challenge);
     }
 
     private async Task CreateMatch(ChallengeMap map)
@@ -250,22 +265,7 @@
 
         Challenge = await _challengeService.GetByIdAsync(Challenge.Id);
 
-        StartedMapIds.Add(map.MapId);
-
         await _challengeService.SetMapAsPlayedAsync(Challenge.Id, map.MapId);
-
-        var (p1Wins, p2Wins) = CountWins(Challenge.Matches);
-        int maxMatches = GetMaxMatches(Challenge.SeriesFormat);
-        int requiredWins = GetMatchesNeededToWin(Challenge.SeriesFormat);
-
-        if (p1Wins >= requiredWins || p2Wins >= requiredWins || Challenge.Matches.Count() >= maxMatches)
-        {
-            Challenge.Status = ChallengeStatus.Completed;
-        }
-        else
-        {
-            Challenge.Status = ChallengeStatus.InProgress;
-        }
 
         await _challengeService.UpdateAsync(Challenge);
         
