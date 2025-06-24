@@ -46,56 +46,12 @@
     @foreach (var map in Challenge.ChallengeMaps)
     {
         var match = Challenge.Matches.FirstOrDefault(m => m.MapId == map.MapId);
+        bool matchExists = match is not null;
+        bool matchHasWinner = match?.Player1Won is not null;
 
-        @if (!map.IsPlayed)
+        if (matchExists && matchHasWinner)
         {
-            <div class="border border-blue-400/30 bg-[#1a1f2b] rounded-lg shadow-lg shadow-blue-500/10 p-4 mb-6">
-                <h4 class="font-semibold mb-2">Match för @map.Map.Name</h4>
-
-                <div class="flex justify-between items-center gap-4 mb-2">
-                    <!-- Player 1 -->
-                    <div class="flex items-center gap-2">
-                        <span class="text-white">@Challenge.Player1.UserName</span>
-                        <RaceDropdown @bind-Race="player1Races[map.MapId]" />
-
-                        @if (match?.Player1Won != null)
-                        {
-                            <span class="@(match.Player1Won == true ? "text-green-400 font-bold text-xl" : "text-red-400 font-bold text-xl")">
-                                @(match.Player1Won == true ? "W" : "L")
-                            </span>
-                        }
-                    </div>
-
-                    <div class="text-gray-400">vs</div>
-
-                    <!-- Player 2 -->
-                    <div class="flex items-center gap-2">
-                        @if (match?.Player1Won != null)
-                        {
-                            <span class="@(match.Player1Won == false ? "text-green-400 font-bold text-xl" : "text-red-400 font-bold text-xl")">
-                                @(match.Player1Won == false ? "W" : "L")
-                            </span>
-                        }
-                        <RaceDropdown @bind-Race="player2Races[map.MapId]" />
-                        <span class="text-white">@Challenge.Player2.UserName</span>                       
-                    </div>
-                </div>
-
-                @if (match is not null && match.Player1Won == null)
-                {
-                    <div class="flex justify-center gap-4 mt-2">
-                        <button class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-auto hover:cursor-pointer" @onclick="() => SetWinner(match, true)">
-                            @Challenge.Player1.UserName vann
-                        </button>
-                        <button class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-auto hover:cursor-pointer" @onclick="() => SetWinner(match, false)">
-                            @Challenge.Player2.UserName vann
-                        </button>
-                    </div>
-                }
-            </div>
-        }
-        else if (match is not null && match.Player1Won != null)
-        {
+            // ✅ Match spelad och avgjord
             <div class="bg-gray-800/50 rounded-lg p-3 mt-2">
                 <div class="text-center text-gray-300 mb-2">
                     <strong>Match slutförd på @map.Map.Name</strong>
@@ -123,11 +79,43 @@
                 </div>
             </div>
         }
-        else if (Challenge.Status != ChallengeStatus.Completed)
+        else if (matchExists && !matchHasWinner)
         {
+            // ✅ Match påbörjad men ingen vinnare än
+            <div class="border border-blue-400/30 bg-[#1a1f2b] rounded-lg shadow-lg shadow-blue-500/10 p-4 mb-6">
+                <h4 class="font-semibold mb-2">Match för @map.Map.Name</h4>
+                <div class="flex justify-between items-center gap-4 mb-2">
+                    <!-- Player 1 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-white">@Challenge.Player1.UserName</span>
+                        <RaceDropdown @bind-Race="player1Races[map.MapId]" />
+                    </div>
+
+                    <div class="text-gray-400">vs</div>
+
+                    <!-- Player 2 -->
+                    <div class="flex items-center gap-2">
+                        <RaceDropdown @bind-Race="player2Races[map.MapId]" />
+                        <span class="text-white">@Challenge.Player2.UserName</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-4 mt-2">
+                    <button class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-auto hover:cursor-pointer" @onclick="() => SetWinner(match, true)">
+                        @Challenge.Player1.UserName vann
+                    </button>
+                    <button class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition w-auto hover:cursor-pointer" @onclick="() => SetWinner(match, false)">
+                        @Challenge.Player2.UserName vann
+                    </button>
+                </div>
+            </div>
+        }
+        else if (!matchExists && Challenge.Status != ChallengeStatus.Completed)
+        {
+            // ✅ Ingen match ännu – visa knapp att starta
             <div class="grid grid-cols-1 gap-y-2">
-                <button class="mt-4 btn btn-primary cursor-pointer " @onclick="() => CreateMatch(map)">
-                    Starta match
+                <button class="mt-4 btn btn-primary cursor-pointer" @onclick="() => CreateMatch(map)">
+                    Starta match på @map.Map.Name
                 </button>
             </div>
         }
