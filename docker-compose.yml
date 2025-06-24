@@ -40,6 +40,19 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+    command: dotnet watch run --urls=http://+:8080
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /src
+          ignore:
+            - bin/
+            - obj/
+            - .git/
+            - node_modules/
+        - action: rebuild
+          path: StarcraftOrganizer.csproj
 
 volumes:
   postgres_data:
