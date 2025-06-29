@@ -17,12 +17,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-    ?? builder.Configuration.GetConnectionString("PostgreSQL")
-    ?? builder.Configuration.GetConnectionString("SQL"); // Fallback
+builder.Configuration.AddUserSecrets<Program>();
 
-builder.Services.AddDbContextFactory<DataContext>(x => x.UseNpgsql(connectionString)); // Ändrat från UseSqlServer
+// Försök läsa connection string
+builder.Configuration.AddEnvironmentVariables();
 
+// Här prioriterar vi: miljövariabel > appsettings
+var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+                    ?? builder.Configuration.GetConnectionString("Default")
+                    ?? throw new InvalidOperationException("Ingen giltig databasanslutning kunde hittas");
+
+builder.Services.AddDbContextFactory<DataContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+});
 
 
 
@@ -48,19 +56,34 @@ builder.Services.AddScoped<ChallengeMapsService>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+    try
+    {
+        context.Database.Migrate();
+        Console.WriteLine("Database migrations completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Migration failed: {ex.Message}");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
-
+var urls = app.Configuration.GetValue<string>("ASPNETCORE_URLS") ?? "";
+if (urls.StartsWith("http://") || !app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAntiforgery();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

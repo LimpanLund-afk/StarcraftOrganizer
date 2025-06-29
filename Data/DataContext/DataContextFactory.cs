@@ -11,26 +11,19 @@ namespace StarcraftOrganizer.Data.DataContext
         {
             var configBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.Development.json", optional: true);
-
-            // Lägg till User Secrets bara om de finns
-            //try
-            //{
-            //    //configBuilder.AddUserSecrets<Program>();
-            //}
-            //catch
-            //{
-            //    // Ignorera om User Secrets inte finns/är tomma
-            //}
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.Development.json", optional: true)
+                .AddEnvironmentVariables();
 
             var config = configBuilder.Build();
 
-            var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-                ?? config.GetConnectionString("PostgreSQL")
-                ?? config.GetConnectionString("SQL");
+            var connectionString = config.GetConnectionString("DB_CONNECTION_STRING")
+                                   ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+                                   ?? throw new InvalidOperationException("Ingen giltig databasanslutning hittades i DataContextFactory");
 
             var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
             optionsBuilder.UseNpgsql(connectionString);
+
             return new DataContext(optionsBuilder.Options);
         }
     }
