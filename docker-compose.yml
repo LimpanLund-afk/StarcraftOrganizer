@@ -41,7 +41,6 @@ services:
     env_file:
       - .env
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - DATABASE_CONNECTION_STRING=${DB_CONNECTION_STRING} 
     ports:
